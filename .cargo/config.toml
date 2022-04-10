@@ -1,0 +1,2 @@
+[alias]
+gitt = "run --bin gitt --"
