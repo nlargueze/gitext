@@ -18,6 +18,10 @@ enum Commands {
     Init(commands::init::Args),
     /// Commits the current changes
     Commit(commands::commit::Args),
+    /// Amends the last commit
+    Amend(commands::amend::Args),
+    /// Lints a commit message
+    Lint(commands::lint::Args),
 }
 
 fn main() {
@@ -31,6 +35,12 @@ fn main() {
         }
         Commands::Commit(args) => {
             commands::commit::run(args);
+        }
+        Commands::Amend(args) => {
+            commands::amend::run(args);
+        }
+        Commands::Lint(args) => {
+            commands::lint::run(args);
         }
     }
 }

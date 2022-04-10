@@ -1,6 +1,9 @@
 //! Init command
 
-use std::env::{current_dir, set_current_dir};
+use std::{
+    env::{current_dir, set_current_dir},
+    process::exit,
+};
 
 use clap::Parser;
 use console::{style, Term};
@@ -31,7 +34,7 @@ pub fn run(args: &Args) {
                     .as_str(),
             )
             .unwrap();
-            return;
+            exit(1);
         }
     };
 
@@ -52,7 +55,7 @@ pub fn run(args: &Args) {
                     .as_str(),
             )
             .unwrap();
-            return;
+            exit(1);
         }
     };
 
@@ -80,7 +83,7 @@ pub fn run(args: &Args) {
                         .as_str(),
                 )
                 .unwrap();
-                return;
+                exit(1);
             }
         };
     } else {
@@ -105,11 +108,11 @@ pub fn run(args: &Args) {
                             .as_str(),
                     )
                     .unwrap();
-                    return;
+                    exit(1);
                 }
             };
         } else {
-            return;
+            exit(0);
         }
     }
 }

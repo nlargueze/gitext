@@ -8,11 +8,8 @@ use std::{
 
 use clap::Parser;
 use console::{style, Term};
-use dialoguer::{theme::ColorfulTheme, Confirm, Editor, Input, Select};
 
-use crate::{commit::ConventionalCommit, config::Config};
-
-/// commit command arguments
+/// amend command arguments
 #[derive(Debug, Parser)]
 pub struct Args {
     /// Path to the repo directory
@@ -60,21 +57,6 @@ pub fn run(args: &Args) {
         }
     };
 
-    // load the config
-    let config = match Config::load(&cwd) {
-        Ok(cfg) => cfg,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Missing or invalid config : {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
-
     // git add -A
     term.write_line("Staging changes …").unwrap();
     let output = Command::new("git")
@@ -108,108 +90,10 @@ pub fn run(args: &Args) {
         .unwrap();
     }
 
-    // git commit
-    // > type
-    let commit_types: Vec<_> = config
-        .commits
-        .types
-        .iter()
-        .map(|(k, v)| format!("{}: {}", k, v.desc))
-        .collect();
-    let commit_types_keys: Vec<_> = config
-        .commits
-        .types
-        .iter()
-        .map(|(k, _v)| format!("{}", k))
-        .collect();
-    let select_type = Select::with_theme(&ColorfulTheme::default())
-        .items(&commit_types)
-        .clear(true)
-        .default(0)
-        .report(true)
-        .with_prompt("Commit type")
-        .interact_on_opt(&Term::stderr())
-        .unwrap();
-    let commit_type = match select_type {
-        Some(i) => commit_types_keys[i].clone(),
-        None => {
-            term.write_line(
-                style("✗ A commit type must be selected")
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
-    // > scope
-    let scope: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt("Commit scope")
-        .report(true)
-        .allow_empty(true)
-        .interact_text()
-        .unwrap();
-    let scope = if scope.is_empty() { None } else { Some(scope) };
-    // > description
-    let description: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt("Commit description")
-        .report(true)
-        .interact_text()
-        .unwrap();
-    // > body
-    let body = match Editor::new()
-        .executable("micro")
-        .require_save(true)
-        .trim_newlines(true)
-        .edit("")
-    {
-        Ok(rv) => rv,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Failed to edit body: {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
-    // > breaking changes
-    let is_breaking_change = Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Breaking change")
-        .report(true)
-        .default(false)
-        .interact()
-        .unwrap();
-    let breaking_change = if is_breaking_change {
-        let desc: String = Input::with_theme(&ColorfulTheme::default())
-            .with_prompt("Breaking change description")
-            .report(true)
-            .allow_empty(true)
-            .interact_text()
-            .unwrap();
-        Some(desc)
-    } else {
-        None
-    };
-
-    // write the commit message
-    let commit = ConventionalCommit {
-        r#type: commit_type,
-        scope,
-        description,
-        body,
-        breaking_change,
-    };
-
-    let commit_msg = commit.to_string();
-
-    // submit the commit
-    term.write_line("Committing …").unwrap();
+    // git commit (amend)
+    term.write_line("Amending commit …").unwrap();
     let mut cmd = Command::new("git");
-    cmd.args(["commit", "-m", &commit_msg]);
+    cmd.args(["commit", "--amend", "--no-edit"]);
     let output = cmd
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -233,12 +117,11 @@ pub fn run(args: &Args) {
             format!(
                 "{} {}",
                 style("✔").green(),
-                style("Committed changes").bold()
+                style("Committed changes (amend)").bold()
             )
             .as_str(),
         )
         .unwrap();
-        term.write_line(&commit_msg).unwrap();
     }
 
     // git push

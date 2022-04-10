@@ -148,3 +148,6 @@ impl Config {
         path.join(CONFIG_FILE).exists()
     }
 }
+
+/// Commit type
+pub enum CommitType {}

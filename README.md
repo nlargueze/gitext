@@ -2,10 +2,11 @@
 
 Tools for git
 
-## API summary
+## Commands summary
 
 - `gitt init`: Initialize the current repository.
-- `gitt commit`: adds all changes and opens a form to submit conventional commits.
+- `gitt commit`: adds all changes and opens a form to submit a conventional commit.
+- `gitt amend`: Amends an existing commit.
 - `gitt lint`: Checks that the commit message adheres to the conventional commit format.
 - `gitt changelog`: Generates the changelog from git history.
 - `gitt bump`: Bumps the version based on conventional commits.
@@ -19,11 +20,19 @@ Initializes the current repository, and creates a `gitt.toml` configuraton file.
 
 ### `gitt commit`
 
-Adds all commits, opens a form to submit conventional commits, and pushes the commit.
+Adds all commits, opens a form to submit a conventional commit, and pushes the commit.
 
 Options:
 
-- `--no-push`: do not push the commit.
+- `--push`: pushes the commit.
+
+### `gitt amend`
+
+Amends the previous commit.
+
+Options:
+
+- `--push`: pushes the commit.
 
 ### `gitt lint`
 
