@@ -19,6 +19,9 @@ pub struct Args {
     /// If set, the commit will be pushed to the remote
     #[clap(long, short)]
     pub push: bool,
+    /// If set, the commit is amended
+    #[clap(long, short)]
+    pub amend: bool,
 }
 
 /// Runs the command
@@ -210,8 +213,12 @@ pub fn run(args: &Args) {
 
     // submit the commit
     term.write_line("Committing …").unwrap();
-    let output = Command::new("git")
-        .args(["commit", "-m", &commit_msg])
+    let mut cmd = Command::new("git");
+    cmd.args(["commit", "-m", &commit_msg]);
+    if args.amend {
+        cmd.arg("--amend");
+    }
+    let output = cmd
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()
@@ -256,10 +263,10 @@ pub fn run(args: &Args) {
         //     term.write_line(&String::from_utf8_lossy(&output.stdout))
         //         .unwrap();
         // }
-        if !output.stderr.is_empty() {
-            term.write_line(&String::from_utf8_lossy(&output.stderr))
-                .unwrap();
-        }
+        // if !output.stderr.is_empty() {
+        //     term.write_line(&String::from_utf8_lossy(&output.stderr))
+        //         .unwrap();
+        // }
         if !output.status.success() {
             term.write_line(style("✗ Failed to push").red().to_string().as_str())
                 .unwrap();
@@ -269,7 +276,6 @@ pub fn run(args: &Args) {
                 format!("{} {}", style("✔").green(), style("Pushed commit").bold()).as_str(),
             )
             .unwrap();
-            term.write_line(&commit_msg).unwrap();
         }
     }
 }
