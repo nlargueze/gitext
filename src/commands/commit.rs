@@ -8,7 +8,6 @@ use std::{
 use clap::Parser;
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm, Editor, Input, Select};
-use git2::Repository;
 use indoc::formatdoc;
 
 /// commit command arguments
@@ -18,8 +17,8 @@ pub struct Args {
     #[clap(long)]
     pub cwd: Option<String>,
     /// If set, the commit will be pushed to the remote
-    #[clap(long)]
-    pub push: Option<bool>,
+    #[clap(long, short)]
+    pub push: bool,
 }
 
 /// Runs the command
@@ -245,4 +244,33 @@ pub fn run(args: &Args) {
     }
 
     // git push
+    if args.push {
+        term.write_line("Pushing …").unwrap();
+        let output = Command::new("git")
+            .args(["push"])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .expect("Failed to execute command");
+        term.clear_last_lines(1).unwrap();
+        if !output.stdout.is_empty() {
+            term.write_line(&String::from_utf8_lossy(&output.stdout))
+                .unwrap();
+        }
+        if !output.stderr.is_empty() {
+            term.write_line(&String::from_utf8_lossy(&output.stderr))
+                .unwrap();
+        }
+        if !output.status.success() {
+            term.write_line(style("✗ Failed to push").red().to_string().as_str())
+                .unwrap();
+            return;
+        } else {
+            term.write_line(
+                format!("{} {}", style("✔").green(), style("Pushed commit").bold()).as_str(),
+            )
+            .unwrap();
+            term.write_line(&commit_msg).unwrap();
+        }
+    }
 }
