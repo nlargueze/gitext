@@ -217,10 +217,10 @@ pub fn run(args: &Args) {
         .output()
         .expect("Failed to execute command");
     term.clear_last_lines(1).unwrap();
-    // if !output.stdout.is_empty() {
-    //     term.write_line(&String::from_utf8_lossy(&output.stdout))
-    //         .unwrap();
-    // }
+    if !output.stdout.is_empty() {
+        term.write_line(&String::from_utf8_lossy(&output.stdout))
+            .unwrap();
+    }
     if !output.stderr.is_empty() {
         term.write_line(&String::from_utf8_lossy(&output.stderr))
             .unwrap();
@@ -252,10 +252,10 @@ pub fn run(args: &Args) {
             .output()
             .expect("Failed to execute command");
         term.clear_last_lines(1).unwrap();
-        if !output.stdout.is_empty() {
-            term.write_line(&String::from_utf8_lossy(&output.stdout))
-                .unwrap();
-        }
+        // if !output.stdout.is_empty() {
+        //     term.write_line(&String::from_utf8_lossy(&output.stdout))
+        //         .unwrap();
+        // }
         if !output.stderr.is_empty() {
             term.write_line(&String::from_utf8_lossy(&output.stderr))
                 .unwrap();
