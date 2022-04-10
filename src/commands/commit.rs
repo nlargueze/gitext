@@ -207,7 +207,6 @@ pub fn run(args: &Args) {
             .map(|s| format!("\nBREAKING CHANGE: {}", s))
             .unwrap_or_default(),
     );
-    eprintln!("{commit_msg}");
 
     // submit the commit
     term.write_line("Committing …").unwrap();
