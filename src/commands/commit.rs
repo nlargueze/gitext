@@ -211,6 +211,21 @@ pub fn run(args: &Args) {
             .unwrap_or_default(),
     );
 
+    // check the commit format
+    match git_conventional::Commit::parse(&commit_msg) {
+        Ok(_) => {}
+        Err(err) => {
+            term.write_line(
+                style(format!("✗ Invalid conventional commit: {err}"))
+                    .red()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            return;
+        }
+    }
+
     // submit the commit
     term.write_line("Committing …").unwrap();
     let mut cmd = Command::new("git");
@@ -263,13 +278,18 @@ pub fn run(args: &Args) {
         //     term.write_line(&String::from_utf8_lossy(&output.stdout))
         //         .unwrap();
         // }
-        // if !output.stderr.is_empty() {
-        //     term.write_line(&String::from_utf8_lossy(&output.stderr))
-        //         .unwrap();
-        // }
         if !output.status.success() {
             term.write_line(style("✗ Failed to push").red().to_string().as_str())
                 .unwrap();
+            if !output.stderr.is_empty() {
+                term.write_line(
+                    style(String::from_utf8_lossy(&output.stderr))
+                        .red()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
+            }
             return;
         } else {
             term.write_line(
