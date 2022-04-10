@@ -3,12 +3,14 @@
 use std::{
     env::{current_dir, set_current_dir},
     process::{Command, Stdio},
+    string::ToString,
 };
 
 use clap::Parser;
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm, Editor, Input, Select};
-use indoc::formatdoc;
+
+use crate::{commit::Commit, config::Config};
 
 /// commit command arguments
 #[derive(Debug, Parser)]
@@ -47,11 +49,26 @@ pub fn run(args: &Args) {
     } else {
         cwd
     };
-    match set_current_dir(cwd) {
+    match set_current_dir(&cwd) {
         Ok(_) => {}
         Err(err) => {
             term.write_line(
                 style(format!("✗ Failed to set current directory: {err}"))
+                    .red()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            return;
+        }
+    };
+
+    // load the config
+    let config = match Config::load(&cwd) {
+        Ok(cfg) => cfg,
+        Err(err) => {
+            term.write_line(
+                style(format!("✗ Missing or invalid config : {err}"))
                     .red()
                     .to_string()
                     .as_str(),
@@ -96,21 +113,20 @@ pub fn run(args: &Args) {
 
     // git commit
     // > type
-    let conv_types = vec![
-        "feat: A new feature",
-        "fix: A bug fix",
-        "docs: Documentation",
-        "style: Code styling",
-        "refactor: Refactoring code",
-        "perf: Performance Improvements",
-        "test: Tests",
-        "build: Build system",
-        "ci: Continuous Integration",
-        "cd: Continuous Delivery",
-        "chore: Other changes",
-    ];
+    let commit_types: Vec<_> = config
+        .commits
+        .types
+        .iter()
+        .map(|(k, v)| format!("{}: {}", k, v.desc))
+        .collect();
+    let commit_types_keys: Vec<_> = config
+        .commits
+        .types
+        .iter()
+        .map(|(k, _v)| format!("{}", k))
+        .collect();
     let select_type = Select::with_theme(&ColorfulTheme::default())
-        .items(&conv_types)
+        .items(&commit_types)
         .clear(true)
         .default(0)
         .report(true)
@@ -118,20 +134,7 @@ pub fn run(args: &Args) {
         .interact_on_opt(&Term::stderr())
         .unwrap();
     let commit_type = match select_type {
-        Some(i) => match i {
-            0 => "feat",
-            1 => "fix",
-            2 => "docs",
-            3 => "style",
-            4 => "refactor",
-            5 => "perf",
-            6 => "test",
-            7 => "build",
-            8 => "ci",
-            9 => "cd",
-            10 => "chore",
-            _ => unreachable!(),
-        },
+        Some(i) => commit_types_keys[i].clone(),
         None => {
             term.write_line(
                 style("✗ A commit type must be selected")
@@ -196,35 +199,15 @@ pub fn run(args: &Args) {
     };
 
     // write the commit message
-    let commit_msg = formatdoc!(
-        "
-        {}{}: {}
-        {}
-        {}
-        ",
-        commit_type,
-        scope.map(|s| format!("({})", s)).unwrap_or_default(),
+    let commit = Commit {
+        r#type: commit_type,
+        scope,
         description,
-        body.map(|s| format!("\n{}", s)).unwrap_or_default(),
-        breaking_change
-            .map(|s| format!("\nBREAKING CHANGE: {}", s))
-            .unwrap_or_default(),
-    );
+        body,
+        breaking_change,
+    };
 
-    // check the commit format
-    match git_conventional::Commit::parse(&commit_msg) {
-        Ok(_) => {}
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Invalid conventional commit: {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            return;
-        }
-    }
+    let commit_msg = commit.to_string();
 
     // submit the commit
     term.write_line("Committing …").unwrap();

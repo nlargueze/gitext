@@ -1,12 +1,12 @@
 //! Init command
 
-use std::env::current_dir;
+use std::env::{current_dir, set_current_dir};
 
 use clap::Parser;
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm};
 
-use crate::config::{Configuration, CONFIG_FILE};
+use crate::config::{Config, CONFIG_FILE};
 
 /// init command arguments
 #[derive(Debug, Parser)]
@@ -41,10 +41,25 @@ pub fn run(args: &Args) {
         cwd
     };
 
+    // set the current directory
+    match set_current_dir(&cwd) {
+        Ok(_) => {}
+        Err(err) => {
+            term.write_line(
+                style(format!("✗ Failed to set current directory: {err}"))
+                    .red()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            return;
+        }
+    };
+
     let cfg_file = cwd.join(CONFIG_FILE);
 
-    if !Configuration::is_initialized(&cwd) {
-        match Configuration::default().to_file(&cfg_file) {
+    if !Config::is_initialized(&cwd) {
+        match Config::default().to_file(&cfg_file) {
             Ok(_) => {
                 term.write_line(
                     format!(
@@ -74,7 +89,7 @@ pub fn run(args: &Args) {
             .interact()
             .unwrap()
         {
-            match Configuration::default().to_file(&cfg_file) {
+            match Config::default().to_file(&cfg_file) {
                 Ok(_) => {
                     term.write_line(
                         format!("{} Regenerated config file", style("✓").green()).as_str(),
