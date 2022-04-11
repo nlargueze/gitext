@@ -1,33 +1,38 @@
-//! Git tags
+//! wrapper for `git tag`
 
 use std::{fmt::Display, process::Command};
 
+use chrono::{DateTime, FixedOffset, Utc};
 use semver::Version;
 
 use crate::error::{Error, Result};
 
 /// Git tag
 #[derive(Debug, Clone, Eq, Ord)]
-pub struct GitTag {
+pub struct Tag {
     /// Tag name
     pub tag: String,
+    /// Tag commmit hash
+    pub hash: String,
+    /// Tag date
+    pub date: DateTime<Utc>,
     /// Tag message
     pub message: Option<String>,
 }
 
-impl PartialEq for GitTag {
+impl PartialEq for Tag {
     fn eq(&self, other: &Self) -> bool {
         self.tag == other.tag
     }
 }
 
-impl PartialOrd for GitTag {
-    fn partial_cmp(&self, other: &GitTag) -> Option<std::cmp::Ordering> {
+impl PartialOrd for Tag {
+    fn partial_cmp(&self, other: &Tag) -> Option<std::cmp::Ordering> {
         Some(self.tag.cmp(&other.tag))
     }
 }
 
-impl Display for GitTag {
+impl Display for Tag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -41,30 +46,20 @@ impl Display for GitTag {
     }
 }
 
-impl GitTag {
-    /// Creates a new tag
-    pub fn new(tag: &str) -> Self {
-        GitTag {
-            tag: tag.to_string(),
-            message: None,
-        }
-    }
-
-    /// Returns the semver version
+impl Tag {
+    /// Returns the semver version for a tag
     pub fn version(&self) -> Result<Version> {
         Ok(Version::parse(&self.tag)?)
     }
 }
 
-/// Get all tags
-///
-/// This is a wrapper for `git log`
-pub fn get_tags() -> Result<Vec<GitTag>> {
+/// Wrapper for `git tag`
+pub fn git_tag() -> Result<Vec<Tag>> {
     let output = Command::new("git")
         .args([
             "tag",
             "--list",
-            "--format=%(refname:short)|%(creatordate:short)",
+            "--format=%(refname:short)|%(creatordate:iso-strict)|%(objectname)",
         ])
         .output()?;
     if !output.status.success() {
@@ -75,12 +70,20 @@ pub fn get_tags() -> Result<Vec<GitTag>> {
         .unwrap()
         .lines()
         .map(|line| {
-            let parts: Vec<_> = line.splitn(2, '|').collect();
-            if parts.len() != 2 {
+            let parts: Vec<_> = line.splitn(3, '|').collect();
+            if parts.len() != 3 {
                 panic!("Invalid tag line: {}", line);
             }
-            GitTag {
-                tag: parts[0].to_string(),
+            let tag_str = parts[0];
+            let dt_str = parts[1];
+            let hash_str = parts[2];
+
+            Tag {
+                tag: tag_str.to_string(),
+                hash: hash_str.to_string(),
+                date: DateTime::<FixedOffset>::parse_from_rfc3339(dt_str)
+                    .unwrap()
+                    .with_timezone(&Utc),
                 message: None,
             }
         })
@@ -89,17 +92,4 @@ pub fn get_tags() -> Result<Vec<GitTag>> {
     tags.sort();
 
     Ok(tags)
-}
-
-/// Returns the latest git version
-pub fn get_latest_version() -> Result<Option<Version>> {
-    let commits = get_tags()?;
-    let mut versions = commits
-        .iter()
-        .map(|c| c.version())
-        .collect::<Result<Vec<_>>>()?;
-
-    versions.sort();
-
-    Ok(versions.last().cloned())
 }

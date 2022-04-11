@@ -2,7 +2,7 @@
 
 use std::{
     env::{current_dir, set_current_dir},
-    process::{exit, Command, Stdio},
+    process::exit,
     string::ToString,
 };
 
@@ -10,7 +10,11 @@ use clap::Parser;
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm, Editor, Input, Select};
 
-use crate::{config::Config, conventional::ConventionalCommit, git::add::git_add};
+use crate::{
+    config::Config,
+    conventional::ConventionalCommit,
+    git::{add::git_add, git_commit, git_push},
+};
 
 /// commit command arguments
 #[derive(Debug, Parser)]
@@ -37,7 +41,7 @@ pub struct Args {
     #[clap(long, short)]
     pub body: Option<String>,
     /// Commit breaking change
-    #[clap(long, short)]
+    #[clap(long)]
     pub breaking_change: Option<String>,
 }
 
@@ -265,71 +269,50 @@ pub fn run(args: &Args) {
 
     // submit the commit
     term.write_line("Committing …").unwrap();
-    let mut cmd = Command::new("git");
-    cmd.args(["commit", "-m", &commit_msg]);
-    let output = cmd
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()
-        .expect("Failed to execute command");
-    term.clear_last_lines(1).unwrap();
-    if !output.stdout.is_empty() {
-        term.write_line(&String::from_utf8_lossy(&output.stdout))
-            .unwrap();
-    }
-    if !output.stderr.is_empty() {
-        term.write_line(&String::from_utf8_lossy(&output.stderr))
-            .unwrap();
-    }
-    if !output.status.success() {
-        term.write_line(style("✗ Failed to commit").red().to_string().as_str())
-            .unwrap();
-        exit(1);
-    } else {
-        term.write_line(
-            format!(
-                "{} {}",
-                style("✔").green(),
-                style("Committed changes").bold()
+    match git_commit(&commit_msg) {
+        Ok(_) => {
+            term.clear_last_lines(1).unwrap();
+            term.write_line(
+                format!(
+                    "{} {}",
+                    style("✔").green(),
+                    style("Committed changes").bold()
+                )
+                .as_str(),
             )
-            .as_str(),
-        )
-        .unwrap();
-        term.write_line(&commit_msg).unwrap();
+            .unwrap();
+            term.write_line(&commit_msg).unwrap();
+        }
+        Err(err) => {
+            term.clear_last_lines(1).unwrap();
+            term.write_line(
+                style(format!("✗ Failed to commit: {err}"))
+                    .red()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            exit(1);
+        }
     }
 
     // git push
     if args.push {
         term.write_line("Pushing …").unwrap();
-        let output = Command::new("git")
-            .args(["push"])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .expect("Failed to execute command");
-        term.clear_last_lines(1).unwrap();
-        // if !output.stdout.is_empty() {
-        //     term.write_line(&String::from_utf8_lossy(&output.stdout))
-        //         .unwrap();
-        // }
-        if !output.status.success() {
-            term.write_line(style("✗ Failed to push").red().to_string().as_str())
-                .unwrap();
-            if !output.stderr.is_empty() {
+        match git_push() {
+            Ok(_) => {
+                term.clear_last_lines(1).unwrap();
                 term.write_line(
-                    style(String::from_utf8_lossy(&output.stderr))
-                        .red()
-                        .to_string()
-                        .as_str(),
+                    format!("{} {}", style("✔").green(), style("Pushed commit").bold()).as_str(),
                 )
                 .unwrap();
             }
-            exit(1);
-        } else {
-            term.write_line(
-                format!("{} {}", style("✔").green(), style("Pushed commit").bold()).as_str(),
-            )
-            .unwrap();
-        }
+            Err(err) => {
+                term.clear_last_lines(1).unwrap();
+                term.write_line(style("✗ Failed to push").red().to_string().as_str())
+                    .unwrap();
+                exit(1);
+            }
+        };
     }
 }

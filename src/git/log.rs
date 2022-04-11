@@ -1,16 +1,15 @@
-//! Git logs
+//! Wrapper for git log
+
 use std::process::Command;
 
-use chrono::{FixedOffset, DateTime, Utc};
+use chrono::{DateTime, FixedOffset, Utc};
 
 use crate::error::{Error, Result};
 
-use super::commit::GitCommit;
+use super::commit::Commit;
 
-/// Fetches git commits
-///
-/// This is a wrapper for `git log`
-pub fn get_commits() -> Result<Vec<GitCommit>> {
+/// Wrapper for `git_log`
+pub fn git_log() -> Result<Vec<Commit>> {
     // git log --format=----------%nhash:%H%nts:%ad%nauthor:%an%nsubject:%s --date=unix
     let output = Command::new("git")
         .args([
@@ -24,8 +23,8 @@ pub fn get_commits() -> Result<Vec<GitCommit>> {
         return Err(Error::InternalError("Failed to get git logs".to_string()));
     }
 
-    let mut commits: Vec<GitCommit> = Vec::new();
-    let mut commit = GitCommit::default();
+    let mut commits: Vec<Commit> = Vec::new();
+    let mut commit = Commit::default();
     for (i, line) in String::from_utf8(output.stdout)
         .unwrap()
         .lines()
@@ -38,7 +37,7 @@ pub fn get_commits() -> Result<Vec<GitCommit>> {
             if i > 0 {
                 commits.push(commit);
             }
-            commit = GitCommit::default();
+            commit = Commit::default();
             continue;
         }
         // process logs
