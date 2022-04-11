@@ -6,8 +6,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::Result;
 
+/// Configuration directory
+pub const CONFIG_DIR: &str = ".gitt";
+
 /// Configuration file name
-pub const CONFIG_FILE: &str = "gitt.toml";
+pub const CONFIG_FILE: &str = "config.toml";
 
 /// CommitTypeConfig
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -124,30 +127,30 @@ pub struct Config {
 }
 
 impl Config {
-    /// Parses a file and returns a configuration object
-    pub fn from_file(path: &PathBuf) -> Result<Self> {
-        let cfg_str = fs::read_to_string(path)?;
-        Ok(toml::from_str::<Config>(&cfg_str)?)
-    }
-
     /// Loads the configuration file from the current directory
-    pub fn load(cwd: &PathBuf) -> Result<Self> {
-        let file = cwd.join(CONFIG_FILE);
+    pub fn load(repo_path: &PathBuf) -> Result<Self> {
+        let file = repo_path.join(CONFIG_DIR).join(CONFIG_FILE);
         Self::from_file(&file)
     }
 
     /// Saves a [Configuration] to file
-    pub fn to_file(&self, path: &PathBuf) -> Result<()> {
+    pub fn save(&self, repo_path: &PathBuf) -> Result<()> {
         let cfg_str = toml::to_string(self)?;
-        fs::write(path, cfg_str)?;
+        if !repo_path.join(CONFIG_DIR).exists() {
+            fs::create_dir(repo_path.join(CONFIG_DIR))?;
+        }
+        fs::write(repo_path.join(CONFIG_DIR).join(CONFIG_FILE), cfg_str)?;
         Ok(())
     }
 
-    /// Checks if a directory is already initialized
-    pub fn is_initialized(path: &PathBuf) -> bool {
-        path.join(CONFIG_FILE).exists()
+    /// Checks if a repo is already initialized
+    pub fn is_initialized(repo_path: &PathBuf) -> bool {
+        repo_path.join(CONFIG_DIR).join(CONFIG_FILE).exists()
+    }
+
+    /// Parses a file and returns a configuration object
+    pub fn from_file(repo_path: &PathBuf) -> Result<Self> {
+        let cfg_str = fs::read_to_string(repo_path)?;
+        Ok(toml::from_str::<Config>(&cfg_str)?)
     }
 }
-
-/// Commit type
-pub enum CommitType {}

@@ -10,11 +10,14 @@ name = "gitt"
 path = "src/bin/main.rs"
 
 [dependencies]
+chrono = "0.4.19"
 clap = {version = "3.1.8", features = ["derive"]}
 console = "0.15.0"
 dialoguer = "0.10.0"
+handlebars = "4.2.2"
 indoc = "1.0.4"
 regex = "1.5.5"
-serde = {version = "1.0.136", features = ["derive"]}
+semver = "1.0.7"
+serde = { version = "1.0.136", features = ["derive"] }
 thiserror = "1.0.30"
 toml = "0.5.8"

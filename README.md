@@ -1,6 +1,6 @@
 ## Overview
 
-Tools for git
+Tools and extensions for git.
 
 ## Commands summary
 

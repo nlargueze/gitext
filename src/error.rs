@@ -10,8 +10,12 @@ pub enum Error {
     TomlDeserializeError(#[from] toml::de::Error),
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
-    #[error("Invalid commit: {0}")]
+    #[error("{0}")]
     InvalidCommit(String),
+    #[error("{0}")]
+    Semver(#[from] semver::Error),
+    #[error("{0}")]
+    InternalError(String),
 }
 
 /// Crate result type

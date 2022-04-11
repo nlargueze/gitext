@@ -2,7 +2,9 @@
 
 #![deny(missing_docs)]
 
+pub mod changelog;
 pub mod commands;
-pub mod commit;
 pub mod config;
+pub mod conventional;
 pub mod error;
+pub mod git;

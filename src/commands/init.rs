@@ -9,7 +9,7 @@ use clap::Parser;
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm};
 
-use crate::config::{Config, CONFIG_FILE};
+use crate::config::Config;
 
 /// init command arguments
 #[derive(Debug, Parser)]
@@ -17,6 +17,9 @@ pub struct Args {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
+    /// Forces a reset of the repo config
+    #[clap(long)]
+    pub reset: bool,
 }
 
 /// Runs the command
@@ -59,10 +62,8 @@ pub fn run(args: &Args) {
         }
     };
 
-    let cfg_file = cwd.join(CONFIG_FILE);
-
     if !Config::is_initialized(&cwd) {
-        match Config::default().to_file(&cfg_file) {
+        match Config::default().save(&cwd) {
             Ok(_) => {
                 term.write_line(
                     format!(
@@ -73,6 +74,7 @@ pub fn run(args: &Args) {
                     .as_str(),
                 )
                 .unwrap();
+                exit(0);
             }
             Err(err) => {
                 term.write_line(
@@ -86,33 +88,33 @@ pub fn run(args: &Args) {
                 exit(1);
             }
         };
-    } else {
-        if Confirm::with_theme(&ColorfulTheme::default())
+    }
+
+    let reset = match args.reset {
+        true => true,
+        false => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Repo already initialized, reset ?")
             .interact()
-            .unwrap()
-        {
-            match Config::default().to_file(&cfg_file) {
-                Ok(_) => {
-                    term.write_line(
-                        format!("{} Regenerated config file", style("✓").green()).as_str(),
-                    )
+            .unwrap(),
+    };
+
+    if reset {
+        match Config::default().save(&cwd) {
+            Ok(_) => {
+                term.write_line(format!("{} Regenerated config file", style("✓").green()).as_str())
                     .unwrap();
-                }
-                Err(err) => {
-                    term.write_line(
-                        style(format!("✗ Failed to recreate config file: {}", err))
-                            .red()
-                            .bold()
-                            .to_string()
-                            .as_str(),
-                    )
-                    .unwrap();
-                    exit(1);
-                }
-            };
-        } else {
-            exit(0);
-        }
+            }
+            Err(err) => {
+                term.write_line(
+                    style(format!("✗ Failed to recreate config file: {}", err))
+                        .red()
+                        .bold()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
+                exit(1);
+            }
+        };
     }
 }

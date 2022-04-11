@@ -9,7 +9,7 @@ use std::{
 use clap::Parser;
 use console::{style, Term};
 
-use crate::{commit::ConventionalCommit, config::Config};
+use crate::{config::Config, conventional::ConventionalCommit};
 
 /// lint command arguments
 #[derive(Debug, Parser)]
@@ -79,7 +79,18 @@ pub fn run(args: &Args) {
 
     // validate the commit message
     let _commit = match ConventionalCommit::parse(&args.msg, &config) {
-        Ok(c) => c,
+        Ok(c) => {
+            term.write_line(
+                format!(
+                    "{} {}",
+                    style("✔").green(),
+                    style("Conventional commit OK").bold()
+                )
+                .as_str(),
+            )
+            .unwrap();
+            c
+        }
         Err(err) => {
             term.write_line(
                 style(format!("✗ Invalid commit message: {err}"))
