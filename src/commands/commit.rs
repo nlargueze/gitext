@@ -306,13 +306,8 @@ pub fn run(args: &Args) {
         }
         Err(err) => {
             term.clear_last_lines(1).unwrap();
-            term.write_line(
-                style(format!("✗ Failed to commit: {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
             exit(1);
         }
     }
