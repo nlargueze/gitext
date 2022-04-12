@@ -5,9 +5,9 @@ Tools and extensions for git.
 ## Commands summary
 
 - `gitt init`: Initialize the current repository.
+- `gitt lint`: Checks that the commit message adheres to the conventional commit format.
 - `gitt commit`: adds all changes and opens a form to submit a conventional commit.
 - `gitt amend`: Amends an existing commit.
-- `gitt lint`: Checks that the commit message adheres to the conventional commit format.
 - `gitt changelog`: Generates the changelog from git history.
 - `gitt bump`: Bumps the version based on conventional commits.
 - `gitt release`: Performs a release by generating the changelog, creating a commit, tagging the commit, pushing the tag, and optionally pushing to origin.
@@ -17,6 +17,10 @@ Tools and extensions for git.
 ### `gitt init`
 
 Initializes the current repository, and creates a `gitt.toml` configuraton file.
+
+### `gitt lint`
+
+Lints the commit message.
 
 ### `gitt commit`
 
@@ -33,10 +37,6 @@ Amends the previous commit.
 Options:
 
 - `--push`: pushes the commit.
-
-### `gitt lint`
-
-Lints the commit message.
 
 ### `gitt changelog`
 

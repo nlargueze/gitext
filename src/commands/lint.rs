@@ -2,6 +2,7 @@
 
 use std::{
     env::{current_dir, set_current_dir},
+    io,
     process::exit,
     string::ToString,
 };
@@ -14,15 +15,12 @@ use crate::{config::Config, conventional::ConventionalCommit};
 /// lint command arguments
 #[derive(Debug, Parser)]
 pub struct Args {
-    /// Commit message
+    /// Commit message (if ommitted, the message will be read from stdin)
     #[clap(short, long)]
-    pub msg: String,
+    pub msg: Option<String>,
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
-    /// If set, the commit will be pushed to the remote
-    #[clap(long, short)]
-    pub push: bool,
 }
 
 /// Runs the command
@@ -77,8 +75,31 @@ pub fn run(args: &Args) {
         }
     };
 
+    // get the commig message
+    let commit = match &args.msg {
+        Some(c) => c.to_string(),
+        None => {
+            // input is piped
+            if atty::is(atty::Stream::Stdin) {
+                term.write_line(
+                    style("✗ pass a commit message as an option or pipe input")
+                        .red()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
+                exit(1);
+            }
+            let mut stdin = String::new();
+            io::stdin()
+                .read_line(&mut stdin)
+                .expect("Cannot read stdin");
+            stdin
+        }
+    };
+
     // validate the commit message
-    let _commit = match ConventionalCommit::parse(&args.msg, &config) {
+    let _commit = match ConventionalCommit::parse(&commit, &config) {
         Ok(c) => {
             term.write_line(
                 format!(
@@ -92,13 +113,8 @@ pub fn run(args: &Args) {
             c
         }
         Err(err) => {
-            term.write_line(
-                style(format!("✗ Invalid commit message: {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
             exit(1);
         }
     };

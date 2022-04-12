@@ -2,6 +2,7 @@
 
 use std::{
     env::{current_dir, set_current_dir},
+    num::ParseIntError,
     process::exit,
     string::ToString,
 };
@@ -28,21 +29,6 @@ pub struct Args {
     /// If set, no commit is made
     #[clap(long)]
     pub dry_run: bool,
-    /// Commit type
-    #[clap(long, short)]
-    pub r#type: Option<String>,
-    /// Commit scope
-    #[clap(long, short)]
-    pub scope: Option<String>,
-    /// Commit description
-    #[clap(long, short)]
-    pub desc: Option<String>,
-    /// Commit body
-    #[clap(long, short)]
-    pub body: Option<String>,
-    /// Commit breaking change
-    #[clap(long)]
-    pub breaking_change: Option<String>,
 }
 
 /// Runs the command
@@ -97,6 +83,183 @@ pub fn run(args: &Args) {
         }
     };
 
+    // git commit
+    // > type
+    let r#type = {
+        let commit_types: Vec<_> = config
+            .commits
+            .types
+            .iter()
+            .map(|(k, v)| format!("{}: {}", k, v.desc))
+            .collect();
+        let commit_types_keys: Vec<_> = config
+            .commits
+            .types
+            .iter()
+            .map(|(k, _v)| format!("{}", k))
+            .collect();
+        let select_type = Select::with_theme(&ColorfulTheme::default())
+            .items(&commit_types)
+            .clear(true)
+            .default(0)
+            .report(true)
+            .with_prompt("Commit type")
+            .interact_on_opt(&Term::stderr())
+            .unwrap();
+        let r#type = match select_type {
+            Some(i) => commit_types_keys[i].clone(),
+            None => {
+                term.write_line(
+                    style("✗ A commit type must be selected")
+                        .red()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
+                exit(1);
+            }
+        };
+        r#type
+    };
+
+    // > scope
+    let scope = {
+        let scope: String = Input::with_theme(&ColorfulTheme::default())
+            .with_prompt("Commit scope")
+            .report(true)
+            .allow_empty(true)
+            .interact_text()
+            .unwrap();
+        if scope.is_empty() {
+            None
+        } else {
+            Some(scope)
+        }
+    };
+
+    // > subject
+    let subject = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Commit subject")
+        .report(true)
+        .interact_text()
+        .unwrap();
+
+    // > body
+    let body = {
+        match Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Commit message body ?")
+            .report(true)
+            .default(false)
+            .interact()
+            .unwrap()
+        {
+            false => None,
+            true => {
+                match Editor::new()
+                    .executable("micro")
+                    .require_save(true)
+                    .trim_newlines(true)
+                    .edit("")
+                {
+                    Ok(b) => b,
+                    Err(err) => {
+                        term.write_line(
+                            style(format!("✗ Failed to edit body: {err}"))
+                                .red()
+                                .to_string()
+                                .as_str(),
+                        )
+                        .unwrap();
+                        exit(1);
+                    }
+                }
+            }
+        }
+    };
+
+    // > breaking changes
+    let breaking_change = {
+        match Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Breaking change ?")
+            .report(true)
+            .default(false)
+            .interact()
+            .unwrap()
+        {
+            false => None,
+            true => Some(
+                Input::<String>::with_theme(&ColorfulTheme::default())
+                    .with_prompt("Breaking change description".to_string())
+                    .report(true)
+                    .allow_empty(true)
+                    .interact_text()
+                    .unwrap(),
+            ),
+        }
+    };
+
+    // > closed issues
+    let closed_issues = {
+        let issues_str = Input::<String>::with_theme(&ColorfulTheme::default())
+            .with_prompt("Closed issues (comma separated) ?".to_string())
+            .report(true)
+            .allow_empty(true)
+            .interact_text()
+            .unwrap();
+        match issues_str.as_str() {
+            "" => None,
+            s => {
+                let issues: Result<Vec<_>, ParseIntError> = s
+                    .split(',')
+                    .enumerate()
+                    .map(|(_i, p)| p.trim().parse::<u32>())
+                    .collect();
+                match issues {
+                    Ok(ids) => Some(ids),
+                    Err(err) => {
+                        term.write_line(
+                            style(format!("✗ Invalid issue id: {err}"))
+                                .red()
+                                .to_string()
+                                .as_str(),
+                        )
+                        .unwrap();
+                        exit(1);
+                    }
+                }
+            }
+        }
+    };
+
+    // write the commit message
+    let commit = ConventionalCommit {
+        r#type,
+        scope,
+        subject,
+        body,
+        breaking_change,
+        closed_issues,
+    };
+
+    let commit_msg = commit.to_string();
+
+    // validate the commit message
+    match ConventionalCommit::parse(&commit_msg, &config) {
+        Ok(_) => {}
+        Err(err) => {
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
+            exit(1);
+        }
+    }
+
+    // dry-run
+    if args.dry_run {
+        term.write_line("--- COMMIT MESSAGE ---").unwrap();
+        term.write_line(&commit_msg).unwrap();
+        exit(0);
+    }
+
     // git add -A
     term.write_line("Staging changes …").unwrap();
     match git_add() {
@@ -118,153 +281,6 @@ pub fn run(args: &Args) {
             .unwrap();
             exit(1);
         }
-    }
-
-    // git commit
-    // > type
-    let r#type = match &args.r#type {
-        Some(r#type) => r#type.to_string(),
-        None => {
-            let commit_types: Vec<_> = config
-                .commits
-                .types
-                .iter()
-                .map(|(k, v)| format!("{}: {}", k, v.desc))
-                .collect();
-            let commit_types_keys: Vec<_> = config
-                .commits
-                .types
-                .iter()
-                .map(|(k, _v)| format!("{}", k))
-                .collect();
-            let select_type = Select::with_theme(&ColorfulTheme::default())
-                .items(&commit_types)
-                .clear(true)
-                .default(0)
-                .report(true)
-                .with_prompt("Commit type")
-                .interact_on_opt(&Term::stderr())
-                .unwrap();
-            let r#type = match select_type {
-                Some(i) => commit_types_keys[i].clone(),
-                None => {
-                    term.write_line(
-                        style("✗ A commit type must be selected")
-                            .red()
-                            .to_string()
-                            .as_str(),
-                    )
-                    .unwrap();
-                    exit(1);
-                }
-            };
-            r#type
-        }
-    };
-
-    // > scope
-    let scope = match &args.scope {
-        Some(s) => Some(s.to_string()),
-        None => {
-            let scope: String = Input::with_theme(&ColorfulTheme::default())
-                .with_prompt("Commit scope")
-                .report(true)
-                .allow_empty(true)
-                .interact_text()
-                .unwrap();
-            if scope.is_empty() {
-                None
-            } else {
-                Some(scope)
-            }
-        }
-    };
-
-    // > description
-    let description = match &args.desc {
-        Some(d) => d.to_string(),
-        None => Input::with_theme(&ColorfulTheme::default())
-            .with_prompt("Commit description")
-            .report(true)
-            .interact_text()
-            .unwrap(),
-    };
-
-    // > body
-    let body = match &args.body {
-        Some(b) => Some(b.to_string()),
-        None => {
-            match Editor::new()
-                .executable("micro")
-                .require_save(true)
-                .trim_newlines(true)
-                .edit("")
-            {
-                Ok(b) => b,
-                Err(err) => {
-                    term.write_line(
-                        style(format!("✗ Failed to edit body: {err}"))
-                            .red()
-                            .to_string()
-                            .as_str(),
-                    )
-                    .unwrap();
-                    exit(1);
-                }
-            }
-        }
-    };
-
-    // > breaking changes
-    let breaking_change = match &args.breaking_change {
-        Some(b) => Some(b.to_string()),
-        None => {
-            match Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt("Breaking change")
-                .report(true)
-                .default(false)
-                .interact()
-                .unwrap()
-            {
-                false => None,
-                true => Some(
-                    Input::<String>::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Breaking change description".to_string())
-                        .report(true)
-                        .allow_empty(true)
-                        .interact_text()
-                        .unwrap(),
-                ),
-            }
-        }
-    };
-
-    // write the commit message
-    let commit = ConventionalCommit {
-        r#type,
-        scope,
-        description,
-        body,
-        breaking_change,
-    };
-
-    let commit_msg = commit.to_string();
-
-    // validate the commit message
-    match ConventionalCommit::parse(&commit_msg, &config) {
-        Ok(_) => {}
-        Err(err) => {
-            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
-                .unwrap();
-            exit(1);
-        }
-    }
-
-    // dry-run
-    if args.dry_run {
-        term.write_line("--- COMMIT ---").unwrap();
-        term.write_line(&commit_msg).unwrap();
-        exit(0);
     }
 
     // submit the commit
@@ -309,8 +325,13 @@ pub fn run(args: &Args) {
             }
             Err(err) => {
                 term.clear_last_lines(1).unwrap();
-                term.write_line(style("✗ Failed to push").red().to_string().as_str())
-                    .unwrap();
+                term.write_line(
+                    style(format!("✗ Failed to push: {err}"))
+                        .red()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
                 exit(1);
             }
         };
