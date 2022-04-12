@@ -15,6 +15,7 @@ use crate::{
     config::Config,
     conventional::ConventionalCommit,
     git::{add::git_add, git_commit, git_push},
+    utils::StringExt,
 };
 
 /// commit command arguments
@@ -133,16 +134,18 @@ pub fn run(args: &Args) {
         if scope.is_empty() {
             None
         } else {
-            Some(scope)
+            Some(scope.to_lowercase())
         }
     };
 
     // > subject
-    let subject = Input::with_theme(&ColorfulTheme::default())
+    let subject = Input::<String>::with_theme(&ColorfulTheme::default())
         .with_prompt("Commit subject")
         .report(true)
         .interact_text()
-        .unwrap();
+        .unwrap()
+        .trim()
+        .to_lowercase_first();
 
     // > body
     let body = {

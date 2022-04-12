@@ -7,6 +7,7 @@ use regex::Regex;
 use crate::{
     config::Config,
     error::{Error, Result},
+    utils::StringExt,
 };
 
 /// Conventional commit
@@ -60,11 +61,11 @@ impl ConventionalCommit {
                 let parts: Vec<_> = line.splitn(2, ":").collect();
                 if parts.len() != 2 {
                     return Err(Error::InvalidCommit(
-                        "Invalid commit: missing subject".to_string(),
+                        "Invalid commit: missing ':' separator".to_string(),
                     ));
                 }
+                // parse the prefix
                 let prefix = parts[0].trim().to_string();
-                subject = parts[1].trim().to_string();
                 if let Some(capts) = regex_prefix.captures(&prefix) {
                     // get type
                     r#type = match capts.name("type") {
@@ -92,7 +93,14 @@ impl ConventionalCommit {
                             if s.is_empty() {
                                 None
                             } else {
-                                Some(s.trim_start_matches('(').trim_end_matches(')').to_string())
+                                let s = s.trim_matches('(').trim_matches(')');
+                                // check lowercase
+                                if !s.starts_with_lowercase() {
+                                    return Err(Error::InvalidCommit(format!(
+                                        "Invalid commit: scope ({s}) must start with lowercase"
+                                    )));
+                                }
+                                Some(s.to_string())
                             }
                         }
                         None => None,
@@ -114,6 +122,14 @@ impl ConventionalCommit {
                     // eprintln!("desc: {:?}", description);
                 } else {
                     return Err(Error::InvalidCommit(format!("Invalid commit: {}", line)));
+                }
+
+                // process subject
+                subject = parts[1].trim().to_string();
+                if !subject.starts_with_lowercase() {
+                    return Err(Error::InvalidCommit(format!(
+                        "Invalid commit: subject must start with lowercase"
+                    )));
                 }
 
                 continue;
