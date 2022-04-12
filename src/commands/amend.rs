@@ -62,22 +62,23 @@ pub fn run(args: &Args) {
     // git add -A
     term.write_line("Staging changes …").unwrap();
     match git_add() {
-        Ok(_) => {
+        Ok((stdout, stderr)) => {
             term.clear_last_lines(1).unwrap();
             term.write_line(
                 format!("{} {}", style("✔").green(), style("Changes staged").bold()).as_str(),
             )
             .unwrap();
+            if !stdout.is_empty() {
+                term.write_line(&stdout).unwrap();
+            }
+            if !stderr.is_empty() {
+                term.write_line(&stderr).unwrap();
+            }
         }
-        Err(_) => {
+        Err(err) => {
             term.clear_last_lines(1).unwrap();
-            term.write_line(
-                style("✗ Failed to stage changes")
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
             exit(1);
         }
     }
