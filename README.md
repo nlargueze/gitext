@@ -30,7 +30,7 @@ Adds all commits, opens a form to submit a conventional commit, and pushes the c
 
 Amends the previous commit.
 
-### `gitt bump`
+### `gitt bump`s
 
 Bumps the version based on the conventional commit.
 
@@ -43,8 +43,8 @@ Generates the changelog, based on the commit range.
 Performs a release by generating the changelog, creating a commit, tagging the commit, pushing the tag, and optionally pushing to origin.
 
 1. Commits the current changes (if any).
-2. Generates the changelog.
-3. Creates a new commit with the changelog (and release related information).
-4. Tags the commit.
+2. Creates a tag with the new version.
+3. Generates the changelog.
+4. Commits the changelog.
 5. Optionally, pushes the commit/tag to the remote.
 6. Optionally, push to another branch.

@@ -78,7 +78,8 @@ pub fn run(args: &Args) {
         }
     };
 
-    //
+    // get all changelog from the start of the repo
+    // find latest tag and bump
 
     todo!("Implement changelog");
 }

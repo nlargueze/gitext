@@ -14,12 +14,14 @@ pub const CONFIG_FILE: &str = "config.toml";
 
 /// Commits configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfigCommits {
+pub struct CommitsConfig {
+    /// Commit types causing a minor version increment
+    pub types_inc_minor: Vec<String>,
     /// Commit types (key + description)
     pub types: BTreeMap<String, String>,
 }
 
-impl Default for ConfigCommits {
+impl Default for CommitsConfig {
     fn default() -> Self {
         let mut types = BTreeMap::new();
         types.insert("feat".to_string(), "A new feature".to_string());
@@ -34,32 +36,26 @@ impl Default for ConfigCommits {
         types.insert("cd".to_string(), "Continuous Delivery".to_string());
         types.insert("chore".to_string(), "Other changes".to_string());
 
-        Self { types }
+        let types_inc_minor = vec!["feat".to_string()];
+
+        Self {
+            types,
+            types_inc_minor,
+        }
     }
 }
 
 /// Changelog configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfigChangeLog {
-    /// Commit types causing a minor version increment
-    pub types_inc_minor: Vec<String>,
-}
-
-impl Default for ConfigChangeLog {
-    fn default() -> Self {
-        Self {
-            types_inc_minor: vec!["feat".to_string()],
-        }
-    }
-}
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ChangeLogConfig {}
 
 /// Configuration object
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Config {
     /// Commits config
-    pub commits: ConfigCommits,
+    pub commits: CommitsConfig,
     /// Changelog config
-    pub changelog: ConfigChangeLog,
+    pub changelog: ChangeLogConfig,
 }
 
 impl Config {
@@ -92,7 +88,7 @@ impl Config {
 
     /// Checks if a commit type causes a minor increment
     pub fn type_is_minor_inc(&self, commit_type: &str) -> bool {
-        self.changelog
+        self.commits
             .types_inc_minor
             .contains(&commit_type.to_string())
     }

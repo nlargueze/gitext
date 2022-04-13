@@ -1,3 +1,6 @@
+[commits]
+types_inc_minor = ["feat"]
+
 [commits.types]
 build = "Build system"
 cd = "Continuous Delivery"
@@ -12,4 +15,3 @@ style = "Code styling"
 test = "Tests"
 
 [changelog]
-types_inc_minor = ["feat"]

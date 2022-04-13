@@ -7,8 +7,10 @@ use std::marker::PhantomData;
 use handlebars::Handlebars;
 use serde::Serialize;
 
+use crate::config::Config;
+
 /// Changelog template
-const DEFAULT_TEMPLATE: &str = include_str!("changelog/template.md");
+const CHANGELOG_TEMPLATE: &str = include_str!("changelog/template.md");
 
 /// Changelog default file name
 const FILE_NAME: &str = "CHANGELOG.md";
@@ -46,15 +48,15 @@ impl<T: Serialize> Default for ChangeLog<T> {
     fn default() -> Self {
         Self {
             file_name: FILE_NAME.to_string(),
-            template: DEFAULT_TEMPLATE.to_string(),
+            template: CHANGELOG_TEMPLATE.to_string(),
             data: PhantomData,
         }
     }
 }
 
 impl<T: Serialize> ChangeLog<T> {
-    /// Creates a new changelog
-    pub fn new() -> Self {
+    /// Initializes the changelog
+    pub fn init(config: &Config) -> Self {
         Self::default()
     }
 
