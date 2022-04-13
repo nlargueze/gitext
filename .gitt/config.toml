@@ -12,3 +12,4 @@ style = "Code styling"
 test = "Tests"
 
 [changelog]
+types_inc_minor = ["feat"]

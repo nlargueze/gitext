@@ -51,9 +51,9 @@ pub fn git_get_tags() -> Result<Vec<GitTag>> {
 }
 
 /// Wrapper for `git tag $t -a -m $m`
-pub fn git_set_tag(tag: &str) -> Result<()> {
+pub fn git_set_tag(tag: &str, msg: &str) -> Result<()> {
     let output = Command::new("git")
-        .args(["tag", tag, "-a", "-m", format!("Tag v{tag}").as_str()])
+        .args(["tag", tag, "-a", "-m", msg])
         .output()?;
 
     let stderr = String::from_utf8(output.stderr).expect("Invalid stderr");

@@ -13,8 +13,8 @@ pub struct GitCommit {
     pub timestamp: DateTime<Utc>,
     /// Author
     pub author: String,
-    /// Subject
-    pub subject: String,
+    /// Message
+    pub message: String,
 }
 
 impl Default for GitCommit {
@@ -23,7 +23,7 @@ impl Default for GitCommit {
             id: Default::default(),
             timestamp: Utc::now(),
             author: Default::default(),
-            subject: Default::default(),
+            message: Default::default(),
         }
     }
 }
@@ -33,7 +33,7 @@ impl Display for GitCommit {
         writeln!(f, "id:{}", self.id)?;
         writeln!(f, "ts:{}", self.timestamp.to_rfc3339())?;
         writeln!(f, "author:{}", self.author)?;
-        writeln!(f, "subject:{}", self.subject)?;
+        write!(f, "{}", self.message)?;
         Ok(())
     }
 }

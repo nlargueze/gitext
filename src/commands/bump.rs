@@ -7,11 +7,13 @@ use std::{
 
 use clap::Parser;
 use console::{style, Term};
+use dialoguer::{theme::ColorfulTheme, Confirm};
+use log::debug;
 
 use crate::{
     config::Config,
-    git::{git_log, git_set_tag},
-    version::increment_repo_version,
+    git::{git_set_tag, git_status_porcelain},
+    version::bump_repo_version,
 };
 
 /// bump command arguments
@@ -20,13 +22,17 @@ pub struct Args {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
-    /// If set, the next version
+    /// Allows uncommitted changes
+    #[clap(long)]
+    pub allow_uncommitted: bool,
+    /// If set, the next version is provided but not set
     #[clap(long)]
     pub dry_run: bool,
 }
 
 /// Runs the command
 pub fn run(args: &Args) {
+    env_logger::init();
     let term = Term::stderr();
 
     let cwd = match current_dir() {
@@ -52,7 +58,9 @@ pub fn run(args: &Args) {
 
     // set the current directory
     match set_current_dir(&cwd) {
-        Ok(_) => {}
+        Ok(_) => {
+            debug!("Current directory set to {}", cwd.display());
+        }
         Err(err) => {
             term.write_line(
                 style(format!("✗ Failed to set current directory: {err}"))
@@ -80,8 +88,47 @@ pub fn run(args: &Args) {
         }
     };
 
-    // get all commits
-    let commits = match git_log() {
+    // check if the repo is pristine
+    if !args.allow_uncommitted {
+        let commit_status = match git_status_porcelain() {
+            Ok(status) => status,
+            Err(err) => {
+                term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                    .unwrap();
+                exit(1);
+            }
+        };
+
+        if let Some(files_list) = commit_status {
+            term.write_line(
+                style("> Repo has uncommited changes:")
+                    .bold()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            term.write_line(&files_list).unwrap();
+            let ok = Confirm::with_theme(&ColorfulTheme::default())
+                .with_prompt("Tag despite uncommited changes ?")
+                .report(true)
+                .default(false)
+                .interact()
+                .unwrap();
+            if !ok {
+                term.write_line(
+                    style(format!("✗ Uncommited changes -> skipped"))
+                        .red()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
+                exit(0);
+            }
+        }
+    }
+
+    // bump
+    let (next_version, curr_version) = match bump_repo_version(&config) {
         Ok(commits) => commits,
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
@@ -89,45 +136,54 @@ pub fn run(args: &Args) {
             exit(1);
         }
     };
+    term.write_line(
+        format!(
+            "{} {}",
+            style("i").yellow(),
+            style(format!(
+                "{} --> {}",
+                curr_version
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "<none>".to_string()),
+                next_version.to_string()
+            ))
+            .bold(),
+        )
+        .as_str(),
+    )
+    .unwrap();
+    let next_version_str = next_version.to_string();
 
-    // // get the next version
-    // let next_version = match increment_repo_version(&commits) {
-    //     Ok(res) => res,
-    //     Err(err) => {
-    //         term.write_line(
-    //             style(format!("✗ Failed to get last version: {err}"))
-    //                 .red()
-    //                 .to_string()
-    //                 .as_str(),
-    //         )
-    //         .unwrap();
-    //         exit(1);
-    //     }
-    // };
+    // dry run
+    if args.dry_run {
+        debug!("Dry run: tagging skipped");
+        print!("{}", next_version_str);
+        exit(0);
+    }
 
-    // if args.dry_run {
-    //     println!("{}", next_version);
-    //     exit(0);
-    // }
+    // Tag the repo with the new version
 
-    // // Tag the repo with the new version
-    // let next_tag_str = next_version.to_string();
-    // match git_set_tag(&next_version.to_string().as_str()) {
-    //     Ok(_) => {
-    //         term.write_line(
-    //             format!(
-    //                 "{} {}",
-    //                 style("✔").green(),
-    //                 style(format!("Tagged as {next_tag_str}")).bold()
-    //             )
-    //             .as_str(),
-    //         )
-    //         .unwrap();
-    //     }
-    //     Err(err) => {
-    //         term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
-    //             .unwrap();
-    //         exit(1);
-    //     }
-    // }
+    match git_set_tag(
+        &next_version_str,
+        format!("Version v{next_version_str}").as_str(),
+    ) {
+        Ok(_) => {
+            term.write_line(
+                format!(
+                    "{} {}",
+                    style("✔").green(),
+                    style(format!("Repo tagged as {next_version_str}")).bold()
+                )
+                .as_str(),
+            )
+            .unwrap();
+        }
+        Err(err) => {
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
+            exit(1);
+        }
+    }
+
+    print!("{}", next_version_str);
 }

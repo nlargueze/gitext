@@ -2,14 +2,14 @@
 
 pub mod add;
 pub mod commit;
-pub mod log;
+pub mod logg;
 pub mod push;
 pub mod status;
 pub mod tag;
 
 pub use add::*;
 pub use commit::*;
-pub use log::*;
+pub use logg::*;
 pub use push::*;
 pub use status::*;
 pub use tag::*;

@@ -1,23 +1,134 @@
 //! Version management
 
+use log::{debug, warn};
 use semver::{BuildMetadata, Prerelease, Version};
 
 use crate::{
+    config::Config,
+    conventional::ConventionalCommitMessage,
     error::{Error, Result},
-    git::git_get_tags,
+    git::{git_get_tags, git_log, GitTag},
 };
 
-/// Initial version
-const INITIAL_VERSION: Version = Version::new(0, 0, 1);
+/// Repo version
+#[derive(Debug, Clone, Eq, Ord)]
+pub struct RepoVersion {
+    /// Semver version
+    pub version: Version,
+    /// Git tag
+    pub tag: GitTag,
+}
 
-/// Returns the last git tag as a semver version
-pub fn get_repo_current_version() -> Result<Option<Version>> {
+impl PartialEq for RepoVersion {
+    fn eq(&self, other: &Self) -> bool {
+        self.version == other.version
+    }
+}
+
+impl PartialOrd for RepoVersion {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.version.partial_cmp(&other.version)
+    }
+}
+
+/// Increments the repo version
+pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> {
+    let repo_version_opt = get_latest_repo_version()?;
+
+    let log_range = match &repo_version_opt {
+        Some(v) => format!("{}..", v.tag.hash),
+        None => "".to_string(),
+    };
+    let commits = git_log(&log_range)?;
+
+    let mut conv_commits: Vec<ConventionalCommitMessage> = vec![];
+    if conv_commits.len() == 0 {
+        return Err(Error::NoCommits(
+            "Cannot bump without new commits".to_string(),
+        ));
+    }
+    for c in commits {
+        match ConventionalCommitMessage::parse(&c.message, &config.valid_types()) {
+            Ok(conv_commit) => {
+                debug!("commit to version |> {}", c.message);
+                conv_commits.push(conv_commit);
+            }
+            Err(err) => {
+                // NB: skip invalid commits
+                warn!(
+                    "Invalid conventional commit ({}) |> skipped ({})",
+                    c.id, err
+                );
+            }
+        }
+    }
+
+    let curr_version = repo_version_opt.map(|v| v.version);
+
+    let next_version = match &curr_version {
+        None => Version::new(0, 0, 1),
+        Some(curr) => {
+            let mut has_minor_change = false;
+            let mut has_major_change = false;
+            for c in conv_commits {
+                if config.type_is_minor_inc(&c.r#type) {
+                    has_minor_change = true;
+                }
+                if c.breaking_change.is_some() {
+                    has_major_change = true;
+                }
+            }
+
+            let mut next = curr.clone();
+            next.pre = Prerelease::EMPTY;
+            next.build = BuildMetadata::EMPTY;
+            if curr.major > 0 {
+                if has_major_change {
+                    next.major += 1;
+                    next.minor = 0;
+                    next.patch = 0;
+                } else if has_minor_change {
+                    next.minor += 1;
+                    next.patch = 0;
+                } else {
+                    next.patch += 1;
+                }
+            } else {
+                // pre 1.0.0
+                if has_major_change {
+                    next.minor += 1;
+                    next.patch = 0;
+                } else if has_minor_change {
+                    next.patch += 1;
+                } else {
+                    next.patch += 1;
+                }
+            }
+
+            next
+        }
+    };
+
+    Ok((next_version, curr_version))
+}
+
+/// Returns the last repo version
+///
+/// NB:ordered by semver version number, not timestamp, or tag string
+pub fn get_latest_repo_version() -> Result<Option<RepoVersion>> {
     let tags = git_get_tags()?;
 
     // convert to versions
     let mut versions = tags
         .iter()
-        .map(|tag| Version::parse(&tag.tag).map_err(|err| Error::Semver(err)))
+        .map(|tag| {
+            semver::Version::parse(&tag.tag)
+                .map_err(|err| Error::Semver(err))
+                .map(|version| RepoVersion {
+                    version,
+                    tag: tag.clone(),
+                })
+        })
         .collect::<Result<Vec<_>>>()?;
 
     // sort by ascending order
@@ -25,63 +136,4 @@ pub fn get_repo_current_version() -> Result<Option<Version>> {
 
     // get the latest version
     Ok(versions.last().cloned())
-}
-
-/// Trait that commits must implement for version management
-pub trait SemverCommit {
-    /// Checks if the commit has a backwards compatible API, and adds fucntionalities (vs fixing bugs)
-    fn has_minor_change(&self) -> bool;
-    /// Checks if the commit has an API incompatible breaking change.
-    fn has_major_change(&self) -> bool;
-}
-
-/// Increments the version based on a list of conventional commits after the current version
-pub fn increment_repo_version(commits: &Vec<impl SemverCommit>) -> Result<Version> {
-    let curr_version = get_repo_current_version()?;
-
-    let new_version = match curr_version {
-        None => INITIAL_VERSION,
-        Some(curr_version) => {
-            let mut has_minor_change = false;
-            let mut has_major_change = false;
-            for c in commits {
-                if c.has_minor_change() {
-                    has_minor_change = true
-                }
-                if c.has_major_change() {
-                    has_major_change = true
-                }
-            }
-
-            let mut new_version = curr_version.clone();
-            new_version.pre = Prerelease::EMPTY;
-            new_version.build = BuildMetadata::EMPTY;
-            if curr_version.major > 0 {
-                if has_major_change {
-                    new_version.major += 1;
-                    new_version.minor = 0;
-                    new_version.patch = 0;
-                } else if has_minor_change {
-                    new_version.minor += 1;
-                    new_version.patch = 0;
-                } else {
-                    new_version.patch += 1;
-                }
-            } else {
-                // pre 1.0.0
-                if has_major_change {
-                    new_version.minor += 1;
-                    new_version.patch = 0;
-                } else if has_minor_change {
-                    new_version.patch += 1;
-                } else {
-                    new_version.patch += 1;
-                }
-            }
-
-            new_version
-        }
-    };
-
-    Ok(new_version)
 }

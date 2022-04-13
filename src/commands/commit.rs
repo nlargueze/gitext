@@ -10,6 +10,7 @@ use std::{
 use clap::Parser;
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm, Editor, Input, Select};
+use log::debug;
 
 use crate::{
     config::Config,
@@ -34,6 +35,7 @@ pub struct Args {
 
 /// Runs the command
 pub fn run(args: &Args) {
+    env_logger::init();
     let term = Term::stderr();
 
     let cwd = match current_dir() {
@@ -56,7 +58,9 @@ pub fn run(args: &Args) {
         cwd
     };
     match set_current_dir(&cwd) {
-        Ok(_) => {}
+        Ok(_) => {
+            debug!("Current directory set to {}", cwd.display());
+        }
         Err(err) => {
             term.write_line(
                 style(format!("✗ Failed to set current directory: {err}"))
@@ -203,31 +207,42 @@ pub fn run(args: &Args) {
 
     // > closed issues
     let closed_issues = {
-        let issues_str = Input::<String>::with_theme(&ColorfulTheme::default())
-            .with_prompt("Closed issues (comma separated) ?".to_string())
+        match Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Closes issues ?")
             .report(true)
-            .allow_empty(true)
-            .interact_text()
-            .unwrap();
-        match issues_str.as_str() {
-            "" => None,
-            s => {
-                let issues: Result<Vec<_>, ParseIntError> = s
-                    .split(',')
-                    .enumerate()
-                    .map(|(_i, p)| p.trim().parse::<u32>())
-                    .collect();
-                match issues {
-                    Ok(ids) => Some(ids),
-                    Err(err) => {
-                        term.write_line(
-                            style(format!("✗ Invalid issue id: {err}"))
-                                .red()
-                                .to_string()
-                                .as_str(),
-                        )
-                        .unwrap();
-                        exit(1);
+            .default(false)
+            .interact()
+            .unwrap()
+        {
+            false => None,
+            true => {
+                let issues_str = Input::<String>::with_theme(&ColorfulTheme::default())
+                    .with_prompt("Closed issues (comma separated) ?".to_string())
+                    .report(true)
+                    .allow_empty(true)
+                    .interact_text()
+                    .unwrap();
+                match issues_str.as_str() {
+                    "" => None,
+                    s => {
+                        let issues: Result<Vec<_>, ParseIntError> = s
+                            .split(',')
+                            .enumerate()
+                            .map(|(_i, p)| p.trim().parse::<u32>())
+                            .collect();
+                        match issues {
+                            Ok(ids) => Some(ids),
+                            Err(err) => {
+                                term.write_line(
+                                    style(format!("✗ Invalid issue id: {err}"))
+                                        .red()
+                                        .to_string()
+                                        .as_str(),
+                                )
+                                .unwrap();
+                                exit(1);
+                            }
+                        }
                     }
                 }
             }
@@ -335,5 +350,7 @@ pub fn run(args: &Args) {
                 exit(1);
             }
         };
+    } else {
+        debug!("git push skipped");
     }
 }

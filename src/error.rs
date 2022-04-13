@@ -16,6 +16,8 @@ pub enum Error {
     Semver(#[from] semver::Error),
     #[error("{0}")]
     InternalError(String),
+    #[error("{0}")]
+    NoCommits(String),
 }
 
 /// Crate result type

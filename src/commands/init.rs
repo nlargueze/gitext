@@ -8,6 +8,7 @@ use std::{
 use clap::Parser;
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm};
+use log::debug;
 
 use crate::config::Config;
 
@@ -24,6 +25,8 @@ pub struct Args {
 
 /// Runs the command
 pub fn run(args: &Args) {
+    env_logger::init();
+
     let term = Term::stderr();
 
     let cwd = match current_dir() {
@@ -49,7 +52,9 @@ pub fn run(args: &Args) {
 
     // set the current directory
     match set_current_dir(&cwd) {
-        Ok(_) => {}
+        Ok(_) => {
+            debug!("Current directory set to {}", cwd.display());
+        }
         Err(err) => {
             term.write_line(
                 style(format!("✗ Failed to set current directory: {err}"))
@@ -99,6 +104,7 @@ pub fn run(args: &Args) {
     };
 
     if reset {
+        debug!("Configuration is reset");
         match Config::default().save(&cwd) {
             Ok(_) => {
                 term.write_line(format!("{} Regenerated config file", style("✓").green()).as_str())
@@ -116,5 +122,7 @@ pub fn run(args: &Args) {
                 exit(1);
             }
         };
+    } else {
+        debug!("Configuration reset aborted");
     }
 }

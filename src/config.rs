@@ -39,8 +39,19 @@ impl Default for ConfigCommits {
 }
 
 /// Changelog configuration
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct ConfigChangeLog {}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConfigChangeLog {
+    /// Commit types causing a minor version increment
+    pub types_inc_minor: Vec<String>,
+}
+
+impl Default for ConfigChangeLog {
+    fn default() -> Self {
+        Self {
+            types_inc_minor: vec!["feat".to_string()],
+        }
+    }
+}
 
 /// Configuration object
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -77,5 +88,12 @@ impl Config {
     /// Returns a list of valid types
     pub fn valid_types(&self) -> Vec<String> {
         self.commits.types.keys().map(|s| s.clone()).collect()
+    }
+
+    /// Checks if a commit type causes a minor increment
+    pub fn type_is_minor_inc(&self, commit_type: &str) -> bool {
+        self.changelog
+            .types_inc_minor
+            .contains(&commit_type.to_string())
     }
 }

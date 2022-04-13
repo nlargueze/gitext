@@ -1,11 +1,13 @@
-//! Wrapper for `git status` command.
+//! Wrapper for `git status` commands.
 
 use std::process::Command;
 
 use crate::error::{Error, Result};
 
 /// Wrapper for `git status --porcelain`
-pub fn git_status_porcelain() -> Result<(String, String)> {
+///
+/// Returns a list of files that are pending to be committed.
+pub fn git_status_porcelain() -> Result<Option<String>> {
     let output = Command::new("git")
         .args(["status", "--porcelain"])
         .output()
@@ -20,5 +22,9 @@ pub fn git_status_porcelain() -> Result<(String, String)> {
         )));
     }
 
-    Ok((stdout, stderr))
+    if stdout.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(stdout))
+    }
 }

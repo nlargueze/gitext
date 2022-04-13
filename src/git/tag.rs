@@ -3,9 +3,6 @@
 use std::fmt::Display;
 
 use chrono::{DateTime, Utc};
-use semver::Version;
-
-use crate::error::Result;
 
 /// Git tag
 #[derive(Debug, Clone, Eq, Ord)]
@@ -43,12 +40,5 @@ impl Display for GitTag {
                 .map(|m| format!(" | {}", m))
                 .unwrap_or_default()
         )
-    }
-}
-
-impl GitTag {
-    /// Returns the semver version for a tag
-    pub fn version(&self) -> Result<Version> {
-        Ok(Version::parse(&self.tag)?)
     }
 }

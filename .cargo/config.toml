@@ -1,2 +1,5 @@
 [alias]
 gitt = "run --bin gitt --"
+
+[env]
+RUST_LOG = "trace"

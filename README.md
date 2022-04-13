@@ -44,7 +44,7 @@ Performs a release by generating the changelog, creating a commit, tagging the c
 
 1. Commits the current changes (if any).
 2. Generates the changelog.
-3. Creates a new commit with the changelog.
+3. Creates a new commit with the changelog (and release related information).
 4. Tags the commit.
 5. Optionally, pushes the commit/tag to the remote.
 6. Optionally, push to another branch.

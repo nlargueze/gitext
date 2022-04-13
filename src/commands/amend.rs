@@ -8,6 +8,7 @@ use std::{
 
 use clap::Parser;
 use console::{style, Term};
+use log::debug;
 
 use crate::git::{git_add, git_commit_amend, git_push};
 
@@ -24,6 +25,7 @@ pub struct Args {
 
 /// Runs the command
 pub fn run(args: &Args) {
+    env_logger::init();
     let term = Term::stderr();
 
     let cwd = match current_dir() {
@@ -46,7 +48,9 @@ pub fn run(args: &Args) {
         cwd
     };
     match set_current_dir(&cwd) {
-        Ok(_) => {}
+        Ok(_) => {
+            debug!("Current directory set to {}", cwd.display());
+        }
         Err(err) => {
             term.write_line(
                 style(format!("✗ Failed to set current directory: {err}"))
@@ -124,5 +128,7 @@ pub fn run(args: &Args) {
                 exit(1);
             }
         }
+    } else {
+        debug!("git push skipped");
     }
 }
