@@ -15,12 +15,12 @@ use crate::{config::Config, conventional::ConventionalCommitMessage};
 /// lint command arguments
 #[derive(Debug, Parser)]
 pub struct Args {
-    /// Commit message (if ommitted, the message will be read from stdin)
-    #[clap(short, long)]
-    pub msg: Option<String>,
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
+    /// Commit message (if ommitted, the message will be read from stdin)
+    #[clap(short, long)]
+    pub msg: Option<String>,
 }
 
 /// Runs the command

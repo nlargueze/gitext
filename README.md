@@ -8,8 +8,8 @@ Tools and extensions for git.
 - `gitt lint`: Checks that the commit message adheres to the conventional commit format.
 - `gitt commit`: adds all changes and opens a form to submit a conventional commit.
 - `gitt amend`: Amends an existing commit.
-- `gitt changelog`: Generates the changelog from git history.
 - `gitt bump`: Bumps the version based on conventional commits.
+- `gitt changelog`: Generates the changelog from git history.
 - `gitt release`: Performs a release by generating the changelog, creating a commit, tagging the commit, pushing the tag, and optionally pushing to origin.
 
 ## `gitt` commands
@@ -30,13 +30,13 @@ Adds all commits, opens a form to submit a conventional commit, and pushes the c
 
 Amends the previous commit.
 
-### `gitt changelog`
-
-Generates the changelog, based on the commit range.
-
 ### `gitt bump`
 
 Bumps the version based on the conventional commit.
+
+### `gitt changelog`
+
+Generates the changelog, based on the commit range.
 
 ### `gitt release`
 
