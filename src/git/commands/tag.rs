@@ -22,7 +22,7 @@ pub fn git_get_tags() -> Result<Vec<GitTag>> {
         return Err(Error::InternalError("Failed to get git tags".to_string()));
     }
 
-    let mut tags: Vec<_> = String::from_utf8(output.stdout)
+    let tags: Vec<_> = String::from_utf8(output.stdout)
         .unwrap()
         .lines()
         .map(|line| {
