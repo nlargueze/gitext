@@ -81,12 +81,13 @@ pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> 
     };
     let commits = git_log(&log_range)?;
 
-    let mut conv_commits: Vec<ConventionalCommitMessage> = vec![];
-    if conv_commits.is_empty() {
+    if commits.is_empty() {
         return Err(Error::NoCommits(
             "Cannot bump without new commits".to_string(),
         ));
     }
+
+    let mut conv_commits: Vec<ConventionalCommitMessage> = vec![];
     for c in commits {
         match ConventionalCommitMessage::parse(&c.message, &config.valid_types()) {
             Ok(conv_commit) => {
