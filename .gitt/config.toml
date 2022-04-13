@@ -14,4 +14,15 @@ refactor = "Code refactoring"
 style = "Code styling"
 test = "Tests"
 
-[changelog]
+[changelog.types]
+build = "Build system"
+cd = "Continuous Delivery"
+chore = "Other changes"
+ci = "Continuous Integration"
+docs = "Documentation changes"
+feat = "New features"
+fix = "Bug fixes"
+perf = "Performance Improvements"
+refactor = "Code refactoring"
+style = "Code styling changes"
+test = "Tests"

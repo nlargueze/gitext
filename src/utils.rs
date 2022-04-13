@@ -10,6 +10,9 @@ pub trait StringExt {
 
     /// Returns a new string starting with a first character in lowercase
     fn to_lowercase_first(&self) -> String;
+
+    /// Returns a new string starting with a first character in uppercase
+    fn to_uppercase_first(&self) -> String;
 }
 
 impl StringExt for str {
@@ -30,6 +33,19 @@ impl StringExt for str {
             .map(|(i, c)| {
                 if i == 0 {
                     c.to_lowercase().collect::<String>()
+                } else {
+                    c.to_string()
+                }
+            })
+            .collect::<String>()
+    }
+
+    fn to_uppercase_first(&self) -> String {
+        self.chars()
+            .enumerate()
+            .map(|(i, c)| {
+                if i == 0 {
+                    c.to_uppercase().collect::<String>()
                 } else {
                     c.to_string()
                 }

@@ -46,8 +46,30 @@ impl Default for CommitsConfig {
 }
 
 /// Changelog configuration
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct ChangeLogConfig {}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChangeLogConfig {
+    /// Commit types (key + title)
+    pub types: BTreeMap<String, String>,
+}
+
+impl Default for ChangeLogConfig {
+    fn default() -> Self {
+        let mut types = BTreeMap::new();
+        types.insert("feat".to_string(), "New features".to_string());
+        types.insert("fix".to_string(), "Bug fixes".to_string());
+        types.insert("docs".to_string(), "Documentation changes".to_string());
+        types.insert("style".to_string(), "Code styling changes".to_string());
+        types.insert("refactor".to_string(), "Code refactoring".to_string());
+        types.insert("perf".to_string(), "Performance Improvements".to_string());
+        types.insert("test".to_string(), "Tests".to_string());
+        types.insert("build".to_string(), "Build system".to_string());
+        types.insert("ci".to_string(), "Continuous Integration".to_string());
+        types.insert("cd".to_string(), "Continuous Delivery".to_string());
+        types.insert("chore".to_string(), "Other changes".to_string());
+
+        Self { types }
+    }
+}
 
 /// Configuration object
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

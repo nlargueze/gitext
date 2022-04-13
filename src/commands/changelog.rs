@@ -2,6 +2,7 @@
 
 use std::{
     env::{current_dir, set_current_dir},
+    fs,
     process::exit,
 };
 
@@ -10,7 +11,7 @@ use console::{style, Term};
 
 use log::debug;
 
-use crate::config::Config;
+use crate::{changelog::ChangeLog, config::Config};
 
 /// changelog command arguments
 #[derive(Debug, Parser)]
@@ -18,6 +19,9 @@ pub struct Args {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
+    /// If set, the changelog will be generated in the current directory
+    #[clap(long, short)]
+    pub output: Option<String>,
 }
 
 /// Runs the command
@@ -64,7 +68,7 @@ pub fn run(args: &Args) {
     };
 
     // load the config
-    let _config = match Config::load(&cwd) {
+    let config = match Config::load(&cwd) {
         Ok(cfg) => cfg,
         Err(err) => {
             term.write_line(
@@ -78,8 +82,37 @@ pub fn run(args: &Args) {
         }
     };
 
-    // get all changelog from the start of the repo
-    // find latest tag and bump
+    // init the changelog
+    let changelog = match ChangeLog::init(&config) {
+        Ok(cl) => cl,
+        Err(err) => {
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
+            exit(1);
+        }
+    };
 
-    todo!("Implement changelog");
+    // generate the change log file
+    let changelog_str = match changelog.generate() {
+        Ok(s) => s,
+        Err(err) => {
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
+            exit(1);
+        }
+    };
+
+    // save changelog to file if output argument is set
+    if let Some(o) = &args.output {
+        match fs::write(cwd.join(o), &changelog_str) {
+            Ok(_) => {}
+            Err(err) => {
+                term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                    .unwrap();
+                exit(1);
+            }
+        }
+    }
+
+    print!("{changelog_str}");
 }

@@ -20,7 +20,7 @@ pub fn git_log(log_range: &str) -> Result<Vec<GitCommit>> {
     let mut cmd = Command::new("git");
     cmd.args([
         "log",
-        "--format=----------%nhash:%H%nts:%ad%nauthor:%an%nmessage:%B",
+        "--format=hash:%H%nts:%ad%nauthor:%an%nmessage:%B----------",
         "--date=iso-strict",
     ]);
     if !log_range.is_empty() {
@@ -33,21 +33,14 @@ pub fn git_log(log_range: &str) -> Result<Vec<GitCommit>> {
 
     let mut commits: Vec<GitCommit> = Vec::new();
     let mut commit = GitCommit::default();
-    for (i, line) in String::from_utf8(output.stdout)
+    for (_i, line) in String::from_utf8(output.stdout)
         .unwrap()
         .lines()
         .enumerate()
     {
-        // println!("X |>{}", line);
+        // eprintln!("|> {}", line);
 
-        // > new commit log
-        if line.starts_with("----------") {
-            if i > 0 {
-                commits.push(commit);
-            }
-            commit = GitCommit::default();
-            continue;
-        } else if line.starts_with("hash:") {
+        if line.starts_with("hash:") {
             let id = line.strip_prefix("hash:").unwrap();
             commit.id = id.to_string();
         } else if line.starts_with("ts:") {
@@ -60,6 +53,9 @@ pub fn git_log(log_range: &str) -> Result<Vec<GitCommit>> {
         } else if line.starts_with("message:") {
             let msg = line.strip_prefix("message:").unwrap();
             commit.message.push_str(msg);
+        } else if line.starts_with("----------") {
+            commits.push(commit);
+            commit = GitCommit::default();
         } else {
             commit.message.push_str(line);
         }

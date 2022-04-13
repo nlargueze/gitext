@@ -18,6 +18,10 @@ pub enum Error {
     InternalError(String),
     #[error("{0}")]
     NoCommits(String),
+    #[error("Template error: {0}")]
+    TemplateError(#[from] handlebars::TemplateError),
+    #[error("Template render error: {0}")]
+    TemplateRenderError(#[from] handlebars::RenderError),
 }
 
 /// Crate result type

@@ -10,36 +10,70 @@ use crate::{
     git::{git_get_tags, git_log, GitTag},
 };
 
-/// Repo version
+/// GitTag with version information
 #[derive(Debug, Clone, Eq)]
-pub struct RepoVersion {
+pub struct SemverGitTag {
     /// Semver version
     pub version: Version,
     /// Git tag
     pub tag: GitTag,
 }
 
-impl PartialEq for RepoVersion {
+impl PartialEq for SemverGitTag {
     fn eq(&self, other: &Self) -> bool {
         self.version == other.version
     }
 }
 
-impl PartialOrd for RepoVersion {
+impl PartialOrd for SemverGitTag {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.version.partial_cmp(&other.version)
     }
 }
 
-impl Ord for RepoVersion {
+impl Ord for SemverGitTag {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.version.cmp(&other.version)
     }
 }
 
+/// Trait to convert GitTag into SemverGitTag
+pub trait IntoSemverGitTag {
+    /// Converts GitTag into SemverGitTag
+    fn into_semver(self) -> Result<SemverGitTag>;
+}
+
+impl IntoSemverGitTag for GitTag {
+    fn into_semver(self) -> Result<SemverGitTag> {
+        let version = semver::Version::parse(&self.tag)?;
+        Ok(SemverGitTag { version, tag: self })
+    }
+}
+
+/// Trait to convert Vec<GitTag> into Vec<SemverGitTag>
+pub trait IntoSemverGitTags {
+    /// Converts GitTag into SemverGitTag
+    fn into_semver(self) -> Result<Vec<SemverGitTag>>;
+}
+
+impl IntoSemverGitTags for Vec<GitTag> {
+    fn into_semver(self) -> Result<Vec<SemverGitTag>> {
+        let mut tags = Vec::<SemverGitTag>::new();
+        for tag in self {
+            tags.push(tag.into_semver()?);
+        }
+        Ok(tags)
+    }
+}
+
 /// Increments the repo version
+///
+/// ## Notes
+///
+/// The latest version is the latest tag, sorted by semver version,
+/// and all commits after that tag are considered to be part of the next version.
 pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> {
-    let repo_version_opt = get_latest_repo_version()?;
+    let repo_version_opt = get_latest_repo_tag()?;
 
     let log_range = match &repo_version_opt {
         Some(v) => format!("{}..", v.tag.hash),
@@ -119,21 +153,9 @@ pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> 
 /// Returns the last repo version
 ///
 /// NB:ordered by semver version number, not timestamp, or tag string
-pub fn get_latest_repo_version() -> Result<Option<RepoVersion>> {
+pub fn get_latest_repo_tag() -> Result<Option<SemverGitTag>> {
     let tags = git_get_tags()?;
-
-    // convert to versions
-    let mut versions = tags
-        .iter()
-        .map(|tag| {
-            semver::Version::parse(&tag.tag)
-                .map_err(Error::Semver)
-                .map(|version| RepoVersion {
-                    version,
-                    tag: tag.clone(),
-                })
-        })
-        .collect::<Result<Vec<_>>>()?;
+    let mut versions = tags.into_semver()?;
 
     // sort by ascending order
     versions.sort();

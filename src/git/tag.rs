@@ -23,18 +23,6 @@ impl PartialEq for GitTag {
     }
 }
 
-impl PartialOrd for GitTag {
-    fn partial_cmp(&self, other: &GitTag) -> Option<std::cmp::Ordering> {
-        Some(self.tag.cmp(&other.tag))
-    }
-}
-
-impl Ord for GitTag {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.tag.cmp(&other.tag)
-    }
-}
-
 impl Display for GitTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(

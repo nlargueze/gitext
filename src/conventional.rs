@@ -113,7 +113,7 @@ impl ConventionalCommitMessage {
                 let parts: Vec<_> = line.splitn(2, ':').collect();
                 if parts.len() != 2 {
                     return Err(Error::InvalidCommit(
-                        "Invalid commit: missing ':' separator".to_string(),
+                        "Conventional commit missing ':' separator".to_string(),
                     ));
                 }
                 // parse the prefix
@@ -125,7 +125,7 @@ impl ConventionalCommitMessage {
                             let t = m.as_str();
                             if !valid_types.contains(&t.to_string()) {
                                 return Err(Error::InvalidCommit(format!(
-                                    "Invalid commit type: {}",
+                                    "Invalid conventional commit type '{}'",
                                     m.as_str()
                                 )));
                             }
@@ -133,7 +133,7 @@ impl ConventionalCommitMessage {
                         }
                         None => {
                             return Err(Error::InvalidCommit(format!(
-                                "Missing commit type: {}",
+                                "Missing conventional commit type in '{}'",
                                 line
                             )));
                         }

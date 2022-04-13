@@ -45,8 +45,6 @@ pub fn git_get_tags() -> Result<Vec<GitTag>> {
         })
         .collect();
 
-    tags.sort();
-
     Ok(tags)
 }
 
