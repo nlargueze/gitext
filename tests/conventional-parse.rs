@@ -1,17 +1,17 @@
 //! Testing of conventional commits parsing
 
-use gitt::{config::Config, conventional::ConventionalCommit};
+use gitt::{config::Config, conventional::ConventionalCommitMessage};
 use indoc::indoc;
 
 #[test]
 fn oneliner_simple() {
     let msg = indoc!("fix: commit subject");
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),
@@ -26,11 +26,11 @@ fn oneliner_simple() {
 fn oneliner_scope() {
     let msg = indoc!("fix(myscope): commit subject");
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: Some("myscope".to_string()),
             subject: "commit subject".to_string(),
@@ -45,11 +45,11 @@ fn oneliner_scope() {
 fn oneliner_breaking() {
     let msg = indoc!("fix!: commit subject");
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),
@@ -64,11 +64,11 @@ fn oneliner_breaking() {
 fn oneliner_scope_breaking() {
     let msg = indoc!("fix(myscope)!: commit subject");
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: Some("myscope".to_string()),
             subject: "commit subject".to_string(),
@@ -87,11 +87,11 @@ fn body_simple() {
     commit body"
     );
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),
@@ -111,11 +111,11 @@ fn body_multiline_simple() {
     commit body line 2"
     );
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),
@@ -138,11 +138,11 @@ fn body_multiline_breaking_change_no_issues() {
     on several line"
     );
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),
@@ -166,11 +166,11 @@ fn body_multiline_breaking_change_issues() {
     Closes #1"
     );
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),
@@ -192,11 +192,11 @@ fn body_multiline_issues() {
     Closes #1"
     );
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),
@@ -219,11 +219,11 @@ fn body_multiline_issues_2() {
     Closes #2"
     );
 
-    let commit = ConventionalCommit::parse(&msg, &Config::default()).unwrap();
+    let commit = ConventionalCommitMessage::parse(&msg, &Config::default().valid_types()).unwrap();
 
     assert_eq!(
         commit,
-        ConventionalCommit {
+        ConventionalCommitMessage {
             r#type: "fix".to_string(),
             scope: None,
             subject: "commit subject".to_string(),

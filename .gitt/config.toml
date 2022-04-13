@@ -1,45 +1,14 @@
-[commits.types.build]
-desc = "Build system"
-title = "Build system"
-
-[commits.types.cd]
-desc = "Continuous Delivery"
-title = "Continuous Delivery"
-
-[commits.types.chore]
-desc = "Other changes"
-title = "Other changes"
-
-[commits.types.ci]
-desc = "Continuous Integration"
-title = "Continuous Integration"
-
-[commits.types.docs]
-desc = "Documentation"
-title = "Documentation"
-
-[commits.types.feat]
-desc = "A new feature"
-title = "New features"
-
-[commits.types.fix]
-desc = "A bug fix"
-title = "Bug fixes"
-
-[commits.types.perf]
-desc = "Performance Improvements"
-title = "Performance Improvements"
-
-[commits.types.refactor]
-desc = "Code refactoring"
-title = "Code refactoring"
-
-[commits.types.style]
-desc = "Code styling"
-title = "Code styling"
-
-[commits.types.test]
-desc = "Tests"
-title = "Tests"
+[commits.types]
+build = "Build system"
+cd = "Continuous Delivery"
+chore = "Other changes"
+ci = "Continuous Integration"
+docs = "Documentation"
+feat = "A new feature"
+fix = "Bug fixes"
+perf = "Performance Improvements"
+refactor = "Code refactoring"
+style = "Code styling"
+test = "Tests"
 
 [changelog]

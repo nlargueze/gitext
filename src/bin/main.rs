@@ -22,6 +22,8 @@ enum Commands {
     Amend(commands::amend::Args),
     /// Lints a commit message
     Lint(commands::lint::Args),
+    /// Bump a version
+    Bump(commands::bump::Args),
 }
 
 fn main() {
@@ -41,6 +43,9 @@ fn main() {
         }
         Commands::Lint(args) => {
             commands::lint::run(args);
+        }
+        Commands::Bump(args) => {
+            commands::bump::run(args);
         }
     }
 }

@@ -12,128 +12,54 @@ pub const CONFIG_DIR: &str = ".gitt";
 /// Configuration file name
 pub const CONFIG_FILE: &str = "config.toml";
 
-/// CommitTypeConfig
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct CommitTypeConfig {
-    /// Description
-    pub desc: String,
-    /// Title
-    pub title: String,
-}
-
-/// Commits config
+/// Commits configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CommitsConfig {
-    /// Commit types
-    pub types: BTreeMap<String, CommitTypeConfig>,
+pub struct ConfigCommits {
+    /// Commit types (key + description)
+    pub types: BTreeMap<String, String>,
 }
 
-impl Default for CommitsConfig {
+impl Default for ConfigCommits {
     fn default() -> Self {
         let mut types = BTreeMap::new();
-        types.insert(
-            "feat".to_string(),
-            CommitTypeConfig {
-                desc: "A new feature".to_string(),
-                title: "New features".to_string(),
-            },
-        );
-        types.insert(
-            "fix".to_string(),
-            CommitTypeConfig {
-                desc: "A bug fix".to_string(),
-                title: "Bug fixes".to_string(),
-            },
-        );
-        types.insert(
-            "docs".to_string(),
-            CommitTypeConfig {
-                desc: "Documentation".to_string(),
-                title: "Documentation".to_string(),
-            },
-        );
-        types.insert(
-            "style".to_string(),
-            CommitTypeConfig {
-                desc: "Code styling".to_string(),
-                title: "Code styling".to_string(),
-            },
-        );
-        types.insert(
-            "refactor".to_string(),
-            CommitTypeConfig {
-                desc: "Code refactoring".to_string(),
-                title: "Code refactoring".to_string(),
-            },
-        );
-        types.insert(
-            "perf".to_string(),
-            CommitTypeConfig {
-                desc: "Performance Improvements".to_string(),
-                title: "Performance Improvements".to_string(),
-            },
-        );
-        types.insert(
-            "test".to_string(),
-            CommitTypeConfig {
-                desc: "Tests".to_string(),
-                title: "Tests".to_string(),
-            },
-        );
-        types.insert(
-            "build".to_string(),
-            CommitTypeConfig {
-                desc: "Build system".to_string(),
-                title: "Build system".to_string(),
-            },
-        );
-        types.insert(
-            "ci".to_string(),
-            CommitTypeConfig {
-                desc: "Continuous Integration".to_string(),
-                title: "Continuous Integration".to_string(),
-            },
-        );
-        types.insert(
-            "cd".to_string(),
-            CommitTypeConfig {
-                desc: "Continuous Delivery".to_string(),
-                title: "Continuous Delivery".to_string(),
-            },
-        );
-        types.insert(
-            "chore".to_string(),
-            CommitTypeConfig {
-                desc: "Other changes".to_string(),
-                title: "Other changes".to_string(),
-            },
-        );
+        types.insert("feat".to_string(), "A new feature".to_string());
+        types.insert("fix".to_string(), "Bug fixes".to_string());
+        types.insert("docs".to_string(), "Documentation".to_string());
+        types.insert("style".to_string(), "Code styling".to_string());
+        types.insert("refactor".to_string(), "Code refactoring".to_string());
+        types.insert("perf".to_string(), "Performance Improvements".to_string());
+        types.insert("test".to_string(), "Tests".to_string());
+        types.insert("build".to_string(), "Build system".to_string());
+        types.insert("ci".to_string(), "Continuous Integration".to_string());
+        types.insert("cd".to_string(), "Continuous Delivery".to_string());
+        types.insert("chore".to_string(), "Other changes".to_string());
 
         Self { types }
     }
 }
 
-/// Changelog config
+/// Changelog configuration
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct ChangeLogConfig {}
+pub struct ConfigChangeLog {}
 
 /// Configuration object
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Config {
     /// Commits config
-    pub commits: CommitsConfig,
-    /// Change log config
-    pub changelog: ChangeLogConfig,
+    pub commits: ConfigCommits,
+    /// Changelog config
+    pub changelog: ConfigChangeLog,
 }
 
 impl Config {
-    /// Loads the configuration file from the current directory
+    /// Loads the configuration file from the repo
     pub fn load(repo_path: &PathBuf) -> Result<Self> {
         let file = repo_path.join(CONFIG_DIR).join(CONFIG_FILE);
-        Self::from_file(&file)
+        let cfg_str = fs::read_to_string(file)?;
+        Ok(toml::from_str::<Config>(&cfg_str)?)
     }
 
-    /// Saves a [Configuration] to file
+    /// Saves a [Configuration] to the repo
     pub fn save(&self, repo_path: &PathBuf) -> Result<()> {
         let cfg_str = toml::to_string(self)?;
         if !repo_path.join(CONFIG_DIR).exists() {
@@ -148,9 +74,8 @@ impl Config {
         repo_path.join(CONFIG_DIR).join(CONFIG_FILE).exists()
     }
 
-    /// Parses a file and returns a configuration object
-    pub fn from_file(repo_path: &PathBuf) -> Result<Self> {
-        let cfg_str = fs::read_to_string(repo_path)?;
-        Ok(toml::from_str::<Config>(&cfg_str)?)
+    /// Returns a list of valid types
+    pub fn valid_types(&self) -> Vec<String> {
+        self.commits.types.keys().map(|s| s.clone()).collect()
     }
 }

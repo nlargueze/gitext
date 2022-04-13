@@ -13,7 +13,7 @@ use dialoguer::{theme::ColorfulTheme, Confirm, Editor, Input, Select};
 
 use crate::{
     config::Config,
-    conventional::ConventionalCommit,
+    conventional::ConventionalCommitMessage,
     git::{add::git_add, git_commit, git_push},
     utils::StringExt,
 };
@@ -91,7 +91,7 @@ pub fn run(args: &Args) {
             .commits
             .types
             .iter()
-            .map(|(k, v)| format!("{}: {}", k, v.desc))
+            .map(|(k, v)| format!("{}: {}", k, v))
             .collect();
         let commit_types_keys: Vec<_> = config
             .commits
@@ -235,7 +235,7 @@ pub fn run(args: &Args) {
     };
 
     // write the commit message
-    let commit = ConventionalCommit {
+    let commit = ConventionalCommitMessage {
         r#type,
         scope,
         subject,
@@ -247,7 +247,7 @@ pub fn run(args: &Args) {
     let commit_msg = commit.to_string();
 
     // validate the commit message
-    match ConventionalCommit::parse(&commit_msg, &config) {
+    match ConventionalCommitMessage::parse(&commit_msg, &config.valid_types()) {
         Ok(_) => {}
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())

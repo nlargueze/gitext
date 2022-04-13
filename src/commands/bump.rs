@@ -1,26 +1,28 @@
-//! Commit command
+//! Changelog command
 
 use std::{
     env::{current_dir, set_current_dir},
-    io,
     process::exit,
-    string::ToString,
 };
 
 use clap::Parser;
 use console::{style, Term};
 
-use crate::{config::Config, conventional::ConventionalCommitMessage};
+use crate::{
+    config::Config,
+    git::{git_log, git_set_tag},
+    version::increment_repo_version,
+};
 
-/// lint command arguments
+/// bump command arguments
 #[derive(Debug, Parser)]
 pub struct Args {
-    /// Commit message (if ommitted, the message will be read from stdin)
-    #[clap(short, long)]
-    pub msg: Option<String>,
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
+    /// If set, the next version
+    #[clap(long)]
+    pub dry_run: bool,
 }
 
 /// Runs the command
@@ -33,6 +35,7 @@ pub fn run(args: &Args) {
             term.write_line(
                 style(format!("✗ Internal error: {err}"))
                     .red()
+                    .bold()
                     .to_string()
                     .as_str(),
             )
@@ -46,6 +49,8 @@ pub fn run(args: &Args) {
     } else {
         cwd
     };
+
+    // set the current directory
     match set_current_dir(&cwd) {
         Ok(_) => {}
         Err(err) => {
@@ -75,47 +80,54 @@ pub fn run(args: &Args) {
         }
     };
 
-    // get the commig message
-    let commit = match &args.msg {
-        Some(c) => c.to_string(),
-        None => {
-            // input is piped
-            if atty::is(atty::Stream::Stdin) {
-                term.write_line(
-                    style("✗ pass a commit message as an option or pipe input")
-                        .red()
-                        .to_string()
-                        .as_str(),
-                )
-                .unwrap();
-                exit(1);
-            }
-            let mut stdin = String::new();
-            io::stdin()
-                .read_line(&mut stdin)
-                .expect("Cannot read stdin");
-            stdin
-        }
-    };
-
-    // validate the commit message
-    let _commit = match ConventionalCommitMessage::parse(&commit, &config.valid_types()) {
-        Ok(c) => {
-            term.write_line(
-                format!(
-                    "{} {}",
-                    style("✔").green(),
-                    style("Conventional commit OK").bold()
-                )
-                .as_str(),
-            )
-            .unwrap();
-            c
-        }
+    // get all commits
+    let commits = match git_log() {
+        Ok(commits) => commits,
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
                 .unwrap();
             exit(1);
         }
     };
+
+    // // get the next version
+    // let next_version = match increment_repo_version(&commits) {
+    //     Ok(res) => res,
+    //     Err(err) => {
+    //         term.write_line(
+    //             style(format!("✗ Failed to get last version: {err}"))
+    //                 .red()
+    //                 .to_string()
+    //                 .as_str(),
+    //         )
+    //         .unwrap();
+    //         exit(1);
+    //     }
+    // };
+
+    // if args.dry_run {
+    //     println!("{}", next_version);
+    //     exit(0);
+    // }
+
+    // // Tag the repo with the new version
+    // let next_tag_str = next_version.to_string();
+    // match git_set_tag(&next_version.to_string().as_str()) {
+    //     Ok(_) => {
+    //         term.write_line(
+    //             format!(
+    //                 "{} {}",
+    //                 style("✔").green(),
+    //                 style(format!("Tagged as {next_tag_str}")).bold()
+    //             )
+    //             .as_str(),
+    //         )
+    //         .unwrap();
+    //     }
+    //     Err(err) => {
+    //         term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+    //             .unwrap();
+    //         exit(1);
+    //     }
+    // }
 }

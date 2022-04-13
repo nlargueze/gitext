@@ -2,14 +2,14 @@
 
 use std::{
     env::{current_dir, set_current_dir},
-    process::{exit, Command, Stdio},
+    process::exit,
     string::ToString,
 };
 
 use clap::Parser;
 use console::{style, Term};
 
-use crate::git::{git_add, git_push};
+use crate::git::{git_add, git_commit_amend, git_push};
 
 /// amend command arguments
 #[derive(Debug, Parser)]
@@ -85,36 +85,25 @@ pub fn run(args: &Args) {
 
     // git commit (amend)
     term.write_line("Amending commit …").unwrap();
-    let mut cmd = Command::new("git");
-    cmd.args(["commit", "--amend", "--no-edit"]);
-    let output = cmd
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()
-        .expect("Failed to execute command");
-    term.clear_last_lines(1).unwrap();
-    if !output.stdout.is_empty() {
-        term.write_line(&String::from_utf8_lossy(&output.stdout))
-            .unwrap();
-    }
-    if !output.stderr.is_empty() {
-        term.write_line(&String::from_utf8_lossy(&output.stderr))
-            .unwrap();
-    }
-    if !output.status.success() {
-        term.write_line(style("✗ Failed to commit").red().to_string().as_str())
-            .unwrap();
-        exit(1);
-    } else {
-        term.write_line(
-            format!(
-                "{} {}",
-                style("✔").green(),
-                style("Committed changes (amend)").bold()
+    match git_commit_amend() {
+        Ok(_) => {
+            term.clear_last_lines(1).unwrap();
+            term.write_line(
+                format!(
+                    "{} {}",
+                    style("✔").green(),
+                    style("Committed changes (amend)").bold()
+                )
+                .as_str(),
             )
-            .as_str(),
-        )
-        .unwrap();
+            .unwrap();
+        }
+        Err(err) => {
+            term.clear_last_lines(1).unwrap();
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
+            exit(1);
+        }
     }
 
     // git push

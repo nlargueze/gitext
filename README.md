@@ -16,7 +16,7 @@ Tools and extensions for git.
 
 ### `gitt init`
 
-Initializes the current repository, and creates a `gitt.toml` configuraton file.
+Initializes the current repository, and creates a `.gitt/config.toml` configuraton file.
 
 ### `gitt lint`
 
@@ -26,17 +26,9 @@ Lints the commit message.
 
 Adds all commits, opens a form to submit a conventional commit, and pushes the commit.
 
-Options:
-
-- `--push`: pushes the commit.
-
 ### `gitt amend`
 
 Amends the previous commit.
-
-Options:
-
-- `--push`: pushes the commit.
 
 ### `gitt changelog`
 

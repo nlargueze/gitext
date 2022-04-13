@@ -1,15 +1,15 @@
-//! wrapper for `git tag`
+//! Wrappers for `git tag`
 
-use std::{fmt::Display, process::Command};
+use std::fmt::Display;
 
-use chrono::{DateTime, FixedOffset, Utc};
+use chrono::{DateTime, Utc};
 use semver::Version;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 
 /// Git tag
 #[derive(Debug, Clone, Eq, Ord)]
-pub struct Tag {
+pub struct GitTag {
     /// Tag name
     pub tag: String,
     /// Tag commmit hash
@@ -20,19 +20,19 @@ pub struct Tag {
     pub message: Option<String>,
 }
 
-impl PartialEq for Tag {
+impl PartialEq for GitTag {
     fn eq(&self, other: &Self) -> bool {
         self.tag == other.tag
     }
 }
 
-impl PartialOrd for Tag {
-    fn partial_cmp(&self, other: &Tag) -> Option<std::cmp::Ordering> {
+impl PartialOrd for GitTag {
+    fn partial_cmp(&self, other: &GitTag) -> Option<std::cmp::Ordering> {
         Some(self.tag.cmp(&other.tag))
     }
 }
 
-impl Display for Tag {
+impl Display for GitTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -46,50 +46,9 @@ impl Display for Tag {
     }
 }
 
-impl Tag {
+impl GitTag {
     /// Returns the semver version for a tag
     pub fn version(&self) -> Result<Version> {
         Ok(Version::parse(&self.tag)?)
     }
-}
-
-/// Wrapper for `git tag`
-pub fn git_tag() -> Result<Vec<Tag>> {
-    let output = Command::new("git")
-        .args([
-            "tag",
-            "--list",
-            "--format=%(refname:short)|%(creatordate:iso-strict)|%(objectname)",
-        ])
-        .output()?;
-    if !output.status.success() {
-        return Err(Error::InternalError("Failed to get git logs".to_string()));
-    }
-
-    let mut tags: Vec<_> = String::from_utf8(output.stdout)
-        .unwrap()
-        .lines()
-        .map(|line| {
-            let parts: Vec<_> = line.splitn(3, '|').collect();
-            if parts.len() != 3 {
-                panic!("Invalid tag line: {}", line);
-            }
-            let tag_str = parts[0];
-            let dt_str = parts[1];
-            let hash_str = parts[2];
-
-            Tag {
-                tag: tag_str.to_string(),
-                hash: hash_str.to_string(),
-                date: DateTime::<FixedOffset>::parse_from_rfc3339(dt_str)
-                    .unwrap()
-                    .with_timezone(&Utc),
-                message: None,
-            }
-        })
-        .collect();
-
-    tags.sort();
-
-    Ok(tags)
 }

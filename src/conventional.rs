@@ -5,14 +5,13 @@ use std::{io::BufRead, string::ToString};
 use regex::Regex;
 
 use crate::{
-    config::Config,
     error::{Error, Result},
     utils::StringExt,
 };
 
-/// Conventional commit
-#[derive(Debug, PartialEq)]
-pub struct ConventionalCommit {
+/// Conventional commit message
+#[derive(Debug, PartialEq, Default)]
+pub struct ConventionalCommitMessage {
     /// Commit type
     pub r#type: String,
     /// Commit scope
@@ -27,9 +26,62 @@ pub struct ConventionalCommit {
     pub closed_issues: Option<Vec<u32>>,
 }
 
-impl ConventionalCommit {
-    /// Parses a conventionl commit from a string
-    pub fn parse(s: &str, cfg: &Config) -> Result<Self> {
+impl ToString for ConventionalCommitMessage {
+    fn to_string(&self) -> String {
+        let mut s = String::new();
+
+        // prefix
+        s.push_str(
+            format!(
+                "{}{}{}: {}",
+                self.r#type.to_string(),
+                self.scope
+                    .as_ref()
+                    .map(|s| format!("({s})"))
+                    .unwrap_or_default(),
+                self.breaking_change
+                    .as_ref()
+                    .map(|_| "!")
+                    .unwrap_or_default(),
+                self.subject
+            )
+            .as_str(),
+        );
+
+        // body
+        if let Some(b) = &self.body {
+            s.push_str("\n\n");
+            s.push_str(b.as_str());
+        }
+
+        // breaking change
+        let mut has_breaking_change = false;
+        if let Some(b) = &self.breaking_change {
+            has_breaking_change = true;
+            s.push_str("\n\n");
+            s.push_str(format!("BREAKING CHANGE: {}", b).as_str());
+        }
+
+        // closed issues
+        if let Some(issues) = &self.closed_issues {
+            if issues.len() > 0 {
+                if !has_breaking_change {
+                    s.push_str("\n");
+                }
+                for issue in issues {
+                    s.push_str("\n");
+                    s.push_str(format!("Closes #{issue}").as_str());
+                }
+            }
+        }
+
+        s
+    }
+}
+
+impl ConventionalCommitMessage {
+    /// Parses a string into a conventional commit message
+    pub fn parse(s: &str, valid_types: &Vec<String>) -> Result<Self> {
         let mut r#type = String::new();
         let mut scope: Option<String> = None;
         let mut subject = String::new();
@@ -70,14 +122,14 @@ impl ConventionalCommit {
                     // get type
                     r#type = match capts.name("type") {
                         Some(m) => {
-                            let t = m.as_str().to_string();
-                            if !cfg.commits.types.contains_key(&t) {
+                            let t = m.as_str();
+                            if !valid_types.contains(&t.to_string()) {
                                 return Err(Error::InvalidCommit(format!(
                                     "Invalid commit type: {}",
-                                    t
+                                    m.as_str()
                                 )));
                             }
-                            t
+                            t.to_string()
                         }
                         None => {
                             return Err(Error::InvalidCommit(format!(
@@ -246,7 +298,7 @@ impl ConventionalCommit {
             unreachable!("Unreachable line");
         }
 
-        Ok(ConventionalCommit {
+        Ok(ConventionalCommitMessage {
             r#type,
             scope,
             subject,
@@ -254,58 +306,5 @@ impl ConventionalCommit {
             breaking_change,
             closed_issues,
         })
-    }
-}
-
-impl ToString for ConventionalCommit {
-    fn to_string(&self) -> String {
-        let mut s = String::new();
-
-        // prefix
-        s.push_str(
-            format!(
-                "{}{}{}: {}",
-                self.r#type,
-                self.scope
-                    .as_ref()
-                    .map(|s| format!("({s})"))
-                    .unwrap_or_default(),
-                self.breaking_change
-                    .as_ref()
-                    .map(|_| "!")
-                    .unwrap_or_default(),
-                self.subject
-            )
-            .as_str(),
-        );
-
-        // body
-        if let Some(b) = &self.body {
-            s.push_str("\n\n");
-            s.push_str(b.as_str());
-        }
-
-        // breaking change
-        let mut has_breaking_change = false;
-        if let Some(b) = &self.breaking_change {
-            has_breaking_change = true;
-            s.push_str("\n\n");
-            s.push_str(format!("BREAKING CHANGE: {}", b).as_str());
-        }
-
-        // closed issues
-        if let Some(issues) = &self.closed_issues {
-            if issues.len() > 0 {
-                if !has_breaking_change {
-                    s.push_str("\n");
-                }
-                for issue in issues {
-                    s.push_str("\n");
-                    s.push_str(format!("Closes #{issue}").as_str());
-                }
-            }
-        }
-
-        s
     }
 }

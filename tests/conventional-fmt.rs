@@ -1,11 +1,11 @@
 //! Testing of conventional commits
 
-use gitt::conventional::ConventionalCommit;
+use gitt::conventional::ConventionalCommitMessage;
 use indoc::indoc;
 
 #[test]
 fn oneliner_no_scope() {
-    let commit = ConventionalCommit {
+    let commit = ConventionalCommitMessage {
         r#type: "fix".to_string(),
         scope: None,
         subject: "commit subject".to_string(),
@@ -21,7 +21,7 @@ fn oneliner_no_scope() {
 
 #[test]
 fn oneliner_scope() {
-    let commit = ConventionalCommit {
+    let commit = ConventionalCommitMessage {
         r#type: "fix".to_string(),
         scope: Some("myscope".to_string()),
         subject: "commit subject".to_string(),
@@ -37,7 +37,7 @@ fn oneliner_scope() {
 
 #[test]
 fn oneliner_scope_breaking_change() {
-    let commit = ConventionalCommit {
+    let commit = ConventionalCommitMessage {
         r#type: "fix".to_string(),
         scope: Some("myscope".to_string()),
         subject: "commit subject".to_string(),
@@ -57,7 +57,7 @@ fn oneliner_scope_breaking_change() {
 
 #[test]
 fn body() {
-    let commit = ConventionalCommit {
+    let commit = ConventionalCommitMessage {
         r#type: "fix".to_string(),
         scope: Some("myscope".to_string()),
         subject: "commit subject".to_string(),
@@ -78,7 +78,7 @@ fn body() {
 
 #[test]
 fn body_with_issues() {
-    let commit = ConventionalCommit {
+    let commit = ConventionalCommitMessage {
         r#type: "fix".to_string(),
         scope: Some("myscope".to_string()),
         subject: "commit subject".to_string(),
@@ -102,7 +102,7 @@ fn body_with_issues() {
 
 #[test]
 fn body_with_change_and_issues() {
-    let commit = ConventionalCommit {
+    let commit = ConventionalCommitMessage {
         r#type: "fix".to_string(),
         scope: Some("myscope".to_string()),
         subject: "commit subject".to_string(),

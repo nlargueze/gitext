@@ -4,12 +4,13 @@ use std::process::Command;
 
 use chrono::{DateTime, FixedOffset, Utc};
 
-use crate::error::{Error, Result};
-
-use super::commit::Commit;
+use crate::{
+    error::{Error, Result},
+    git::commit::GitCommit,
+};
 
 /// Wrapper for `git_log`
-pub fn git_log() -> Result<Vec<Commit>> {
+pub fn git_log() -> Result<Vec<GitCommit>> {
     // git log --format=----------%nhash:%H%nts:%ad%nauthor:%an%nsubject:%s --date=unix
     let output = Command::new("git")
         .args([
@@ -23,8 +24,8 @@ pub fn git_log() -> Result<Vec<Commit>> {
         return Err(Error::InternalError("Failed to get git logs".to_string()));
     }
 
-    let mut commits: Vec<Commit> = Vec::new();
-    let mut commit = Commit::default();
+    let mut commits: Vec<GitCommit> = Vec::new();
+    let mut commit = GitCommit::default();
     for (i, line) in String::from_utf8(output.stdout)
         .unwrap()
         .lines()
@@ -37,7 +38,7 @@ pub fn git_log() -> Result<Vec<Commit>> {
             if i > 0 {
                 commits.push(commit);
             }
-            commit = Commit::default();
+            commit = GitCommit::default();
             continue;
         }
         // process logs
@@ -48,7 +49,7 @@ pub fn git_log() -> Result<Vec<Commit>> {
         let field = parts[0];
         let value = parts[1];
         match field {
-            "hash" => commit.hash = value.to_string(),
+            "hash" => commit.id = value.to_string(),
             "ts" => {
                 let d =
                     DateTime::<FixedOffset>::parse_from_rfc3339(value).expect("Invalid timestamp");
