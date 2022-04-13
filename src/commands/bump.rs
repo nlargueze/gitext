@@ -25,9 +25,9 @@ pub struct Args {
     /// Allows uncommitted changes when setting the tag
     #[clap(long)]
     pub allow_uncommitted: bool,
-    /// If set, the repo is tagged with the new version
+    /// If set, the repo new version is printed but not set
     #[clap(long)]
-    pub set: bool,
+    pub print_only: bool,
 }
 
 /// Runs the command
@@ -155,8 +155,8 @@ pub fn run(args: &Args) {
     let next_version_str = next_version.to_string();
 
     // dry run
-    if !args.set {
-        debug!("Dry run: tagging skipped");
+    if args.print_only {
+        debug!("Print only: tagging skipped");
         print!("{}", next_version_str);
         exit(0);
     }

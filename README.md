@@ -30,7 +30,7 @@ Adds all commits, opens a form to submit a conventional commit, and pushes the c
 
 Amends the previous commit.
 
-### `gitt bump`s
+### `gitt bump`
 
 Bumps the version based on the conventional commit.
 
