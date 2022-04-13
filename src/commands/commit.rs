@@ -101,7 +101,7 @@ pub fn run(args: &Args) {
             .commits
             .types
             .iter()
-            .map(|(k, _v)| format!("{}", k))
+            .map(|(k, _v)| k.to_string())
             .collect();
         let select_type = Select::with_theme(&ColorfulTheme::default())
             .items(&commit_types)

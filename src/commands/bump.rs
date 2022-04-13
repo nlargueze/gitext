@@ -22,12 +22,12 @@ pub struct Args {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
-    /// Allows uncommitted changes
+    /// Allows uncommitted changes when setting the tag
     #[clap(long)]
     pub allow_uncommitted: bool,
-    /// If set, the next version is provided but not set
+    /// If set, the repo is tagged with the new version
     #[clap(long)]
-    pub dry_run: bool,
+    pub add: bool,
 }
 
 /// Runs the command
@@ -116,7 +116,7 @@ pub fn run(args: &Args) {
                 .unwrap();
             if !ok {
                 term.write_line(
-                    style(format!("✗ Uncommited changes -> skipped"))
+                    style("✗ Uncommited changes -> skipped".to_string())
                         .red()
                         .to_string()
                         .as_str(),
@@ -145,7 +145,7 @@ pub fn run(args: &Args) {
                 curr_version
                     .map(|v| v.to_string())
                     .unwrap_or_else(|| "<none>".to_string()),
-                next_version.to_string()
+                next_version
             ))
             .bold(),
         )
@@ -155,7 +155,7 @@ pub fn run(args: &Args) {
     let next_version_str = next_version.to_string();
 
     // dry run
-    if args.dry_run {
+    if !args.add {
         debug!("Dry run: tagging skipped");
         print!("{}", next_version_str);
         exit(0);

@@ -5,7 +5,7 @@ use std::fmt::Display;
 use chrono::{DateTime, Utc};
 
 /// Git tag
-#[derive(Debug, Clone, Eq, Ord)]
+#[derive(Debug, Clone, Eq)]
 pub struct GitTag {
     /// Tag name
     pub tag: String,
@@ -26,6 +26,12 @@ impl PartialEq for GitTag {
 impl PartialOrd for GitTag {
     fn partial_cmp(&self, other: &GitTag) -> Option<std::cmp::Ordering> {
         Some(self.tag.cmp(&other.tag))
+    }
+}
+
+impl Ord for GitTag {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.tag.cmp(&other.tag)
     }
 }
 

@@ -9,6 +9,7 @@
       "titleBar.activeBackground": "#F74E28",
       "titleBar.inactiveBackground": "#eabdb3",
       "titleBar.activeForeground": "#fff"
-    }
+    },
+    "rust-analyzer.checkOnSave.command": "clippy"
   }
 }

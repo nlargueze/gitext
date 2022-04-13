@@ -24,6 +24,8 @@ enum Commands {
     Lint(commands::lint::Args),
     /// Bump a version
     Bump(commands::bump::Args),
+    /// Creates a changelog
+    Changelog(commands::changelog::Args),
 }
 
 fn main() {
@@ -46,6 +48,9 @@ fn main() {
         }
         Commands::Bump(args) => {
             commands::bump::run(args);
+        }
+        Commands::Changelog(args) => {
+            commands::changelog::run(args);
         }
     }
 }

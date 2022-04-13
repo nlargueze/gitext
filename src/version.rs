@@ -11,7 +11,7 @@ use crate::{
 };
 
 /// Repo version
-#[derive(Debug, Clone, Eq, Ord)]
+#[derive(Debug, Clone, Eq)]
 pub struct RepoVersion {
     /// Semver version
     pub version: Version,
@@ -31,6 +31,12 @@ impl PartialOrd for RepoVersion {
     }
 }
 
+impl Ord for RepoVersion {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.version.cmp(&other.version)
+    }
+}
+
 /// Increments the repo version
 pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> {
     let repo_version_opt = get_latest_repo_version()?;
@@ -42,7 +48,7 @@ pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> 
     let commits = git_log(&log_range)?;
 
     let mut conv_commits: Vec<ConventionalCommitMessage> = vec![];
-    if conv_commits.len() == 0 {
+    if conv_commits.is_empty() {
         return Err(Error::NoCommits(
             "Cannot bump without new commits".to_string(),
         ));
@@ -98,8 +104,6 @@ pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> 
                 if has_major_change {
                     next.minor += 1;
                     next.patch = 0;
-                } else if has_minor_change {
-                    next.patch += 1;
                 } else {
                     next.patch += 1;
                 }
@@ -123,7 +127,7 @@ pub fn get_latest_repo_version() -> Result<Option<RepoVersion>> {
         .iter()
         .map(|tag| {
             semver::Version::parse(&tag.tag)
-                .map_err(|err| Error::Semver(err))
+                .map_err(Error::Semver)
                 .map(|version| RepoVersion {
                     version,
                     tag: tag.clone(),

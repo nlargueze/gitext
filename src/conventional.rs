@@ -34,7 +34,7 @@ impl ToString for ConventionalCommitMessage {
         s.push_str(
             format!(
                 "{}{}{}: {}",
-                self.r#type.to_string(),
+                self.r#type,
                 self.scope
                     .as_ref()
                     .map(|s| format!("({s})"))
@@ -64,12 +64,12 @@ impl ToString for ConventionalCommitMessage {
 
         // closed issues
         if let Some(issues) = &self.closed_issues {
-            if issues.len() > 0 {
+            if !issues.is_empty() {
                 if !has_breaking_change {
-                    s.push_str("\n");
+                    s.push('\n');
                 }
                 for issue in issues {
-                    s.push_str("\n");
+                    s.push('\n');
                     s.push_str(format!("Closes #{issue}").as_str());
                 }
             }
@@ -81,7 +81,7 @@ impl ToString for ConventionalCommitMessage {
 
 impl ConventionalCommitMessage {
     /// Parses a string into a conventional commit message
-    pub fn parse(s: &str, valid_types: &Vec<String>) -> Result<Self> {
+    pub fn parse(s: &str, valid_types: &[String]) -> Result<Self> {
         let mut r#type = String::new();
         let mut scope: Option<String> = None;
         let mut subject = String::new();
@@ -110,7 +110,7 @@ impl ConventionalCommitMessage {
             // >> 1st line
             if i == 0 {
                 // eprintln!("|> subject line");
-                let parts: Vec<_> = line.splitn(2, ":").collect();
+                let parts: Vec<_> = line.splitn(2, ':').collect();
                 if parts.len() != 2 {
                     return Err(Error::InvalidCommit(
                         "Invalid commit: missing ':' separator".to_string(),
@@ -179,9 +179,9 @@ impl ConventionalCommitMessage {
                 // process subject
                 subject = parts[1].trim().to_string();
                 if !subject.starts_with_lowercase() {
-                    return Err(Error::InvalidCommit(format!(
-                        "Invalid commit: subject must start with lowercase"
-                    )));
+                    return Err(Error::InvalidCommit(
+                        "Invalid commit: subject must start with lowercase".to_string(),
+                    ));
                 }
 
                 continue;
@@ -190,7 +190,7 @@ impl ConventionalCommitMessage {
             // line after subject
             if prev_section == Section::Subject {
                 // eprintln!("|> after subject line");
-                if line != "" {
+                if !line.is_empty() {
                     return Err(Error::InvalidCommit(
                         "Invalid commit: body must be separated by an empty line".to_string(),
                     ));
@@ -206,7 +206,7 @@ impl ConventionalCommitMessage {
                 // next line in body is BREAKING CHANGE
                 // NB: strip newline on the previous line
                 if let Some(b) = &mut body {
-                    if let Some(body_stripped) = b.strip_suffix("\n") {
+                    if let Some(body_stripped) = b.strip_suffix('\n') {
                         body = Some(body_stripped.to_string());
                     } else {
                         return Err(Error::InvalidCommit(
@@ -214,7 +214,7 @@ impl ConventionalCommitMessage {
                         ));
                     }
                 }
-                if let Some(_) = breaking_change {
+                if breaking_change.is_some() {
                     return Err(Error::InvalidCommit(
                         "Invalid commit: Several breaking changes".to_string(),
                     ));
@@ -239,7 +239,7 @@ impl ConventionalCommitMessage {
                 // NB: strip newline on the previous line if the issue is after the body
                 if prev_section == Section::Body {
                     if let Some(b) = &mut body {
-                        if let Some(body_stripped) = b.strip_suffix("\n") {
+                        if let Some(body_stripped) = b.strip_suffix('\n') {
                             body = Some(body_stripped.to_string());
                         } else {
                             return Err(Error::InvalidCommit(
@@ -272,7 +272,7 @@ impl ConventionalCommitMessage {
                 // eprintln!("|> breaking change multiline");
                 // next line in footer is part of BREAKING CHANGE
                 if let Some(b) = &mut breaking_change {
-                    b.push_str("\n");
+                    b.push('\n');
                     b.push_str(&line);
                 } else {
                     unreachable!("breaking change should be set");
@@ -284,7 +284,7 @@ impl ConventionalCommitMessage {
                 // eprintln!("|> body line");
                 let mut b = if let Some(body_inner) = &body {
                     let mut b = body_inner.clone();
-                    b.push_str("\n");
+                    b.push('\n');
                     b
                 } else {
                     "".to_string()

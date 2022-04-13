@@ -1,6 +1,6 @@
 //! Configuration
 
-use std::{collections::BTreeMap, fs, path::PathBuf};
+use std::{collections::BTreeMap, fs, path::Path};
 
 use serde::{Deserialize, Serialize};
 
@@ -64,14 +64,14 @@ pub struct Config {
 
 impl Config {
     /// Loads the configuration file from the repo
-    pub fn load(repo_path: &PathBuf) -> Result<Self> {
+    pub fn load(repo_path: &Path) -> Result<Self> {
         let file = repo_path.join(CONFIG_DIR).join(CONFIG_FILE);
         let cfg_str = fs::read_to_string(file)?;
         Ok(toml::from_str::<Config>(&cfg_str)?)
     }
 
     /// Saves a [Configuration] to the repo
-    pub fn save(&self, repo_path: &PathBuf) -> Result<()> {
+    pub fn save(&self, repo_path: &Path) -> Result<()> {
         let cfg_str = toml::to_string(self)?;
         if !repo_path.join(CONFIG_DIR).exists() {
             fs::create_dir(repo_path.join(CONFIG_DIR))?;
@@ -81,13 +81,13 @@ impl Config {
     }
 
     /// Checks if a repo is already initialized
-    pub fn is_initialized(repo_path: &PathBuf) -> bool {
+    pub fn is_initialized(repo_path: &Path) -> bool {
         repo_path.join(CONFIG_DIR).join(CONFIG_FILE).exists()
     }
 
     /// Returns a list of valid types
     pub fn valid_types(&self) -> Vec<String> {
-        self.commits.types.keys().map(|s| s.clone()).collect()
+        self.commits.types.keys().cloned().collect()
     }
 
     /// Checks if a commit type causes a minor increment
