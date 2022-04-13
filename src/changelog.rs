@@ -135,7 +135,7 @@ impl ChangeLog {
                 .groups
                 .entry(r#type.clone())
                 .or_insert_with(|| {
-                    let title = if r#type == "uncategoryzed" {
+                    let title = if r#type == "uncategorized" {
                         "Uncategorized".to_string()
                     } else if let Some(t) = config.changelog.types.get(r#type.as_str()) {
                         t.clone()

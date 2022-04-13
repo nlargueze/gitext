@@ -4,6 +4,10 @@
 
 https://github.com/nlargueze/gitt/compare/0.0.1...HEAD
 
+### New features
+
+- Added change log commit url
+
 ## [0.0.1] - 2022-04-13
 
 ### Other changes
@@ -49,3 +53,4 @@ https://github.com/nlargueze/gitt/compare/0.0.1...HEAD
 - Feat: ABCD
 - Merge branch &#x27;main&#x27; of https://github.com/nlargueze/gitt
 - First commit
+
