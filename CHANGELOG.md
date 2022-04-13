@@ -2,6 +2,8 @@
 
 ## [Unreleased] - 2022-04-13
 
+https://github.com/nlargueze/gitt/compare/0.0.1...HEAD
+
 ## [0.0.1] - 2022-04-13
 
 ### Other changes
@@ -11,6 +13,7 @@
 
 ### New features
 
+- Added changelog generatiom
 - Added lowercase checks
 - Added commit parsing
 - Added ammend option
@@ -19,6 +22,7 @@
 
 ### Bug fixes
 
+- Fixed lint issue
 - Modified config object
 - Added misc changes- added cargo clippy check- added changelog command
 - Added misc stuff

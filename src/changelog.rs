@@ -14,7 +14,7 @@ use crate::{
     config::Config,
     conventional::ConventionalCommitMessage,
     error::Result,
-    git::{git_get_tags, git_log},
+    git::{get_config_origin_url, git_get_tags, git_log},
     utils::StringExt,
     version::IntoSemverGitTags,
 };
@@ -25,6 +25,10 @@ const CHANGELOG_TEMPLATE: &str = indoc!(
 
     {{#each releases}}
     ## [{{this.version}}] - {{this.date}}
+    {{#if this.history_url}}
+
+    {{this.history_url}}
+    {{/if}}
 
     {{#each this.groups}}
     ### {{this.title}}
@@ -36,9 +40,6 @@ const CHANGELOG_TEMPLATE: &str = indoc!(
     {{/each}}
     {{/each}}"
 );
-
-// [Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.0.0...HEAD
-// [1.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.3.0...v1.0.0
 
 /// Changelog release group
 #[derive(Debug, Serialize)]
@@ -54,6 +55,8 @@ struct ChangeLogRelease {
     version: String,
     /// Release date
     date: String,
+    /// Release commit history link
+    history_url: String,
     /// Commit group
     groups: BTreeMap<String, ChangeLogReleaseGroup>,
 }
@@ -64,9 +67,6 @@ struct ChangeLogData {
     /// Commits grouped by release
     releases: Vec<ChangeLogRelease>,
 }
-
-// group by release (unreleased + versions)
-// group by commit type
 
 /// Changelog
 #[derive(Debug)]
@@ -80,19 +80,21 @@ pub struct ChangeLog {
 impl ChangeLog {
     /// Initializes the changelog
     pub fn init(config: &Config) -> Result<Self> {
+        // convert to conventional commits to get type
+        // assign to changelog data
+        let mut data = ChangeLogData { releases: vec![] };
+        data.releases.push(ChangeLogRelease {
+            version: "Unreleased".to_string(),
+            date: Utc::now().format("%Y-%m-%d").to_string(),
+            history_url: "".to_string(),
+            groups: BTreeMap::new(),
+        });
+
         // read all logs from the start of the repository (latest to earliest)
         let commits = git_log("")?;
         // read all tags from the repository
         let tags = git_get_tags()?.into_semver()?;
-        // convert to conventional commits to get type
-        // assign to changelog data
-        let mut data = ChangeLogData { releases: vec![] };
 
-        data.releases.push(ChangeLogRelease {
-            version: "Unreleased".to_string(),
-            date: Utc::now().format("%Y-%m-%d").to_string(),
-            groups: BTreeMap::new(),
-        });
         for c in commits {
             let commit_tag = tags.iter().find(|t| t.tag.hash == c.id);
             match commit_tag {
@@ -101,6 +103,7 @@ impl ChangeLog {
                     data.releases.push(ChangeLogRelease {
                         version: t.version.to_string(),
                         date: t.tag.date.format("%Y-%m-%d").to_string(),
+                        history_url: "".to_string(),
                         groups: BTreeMap::new(),
                     });
                 }
@@ -150,7 +153,25 @@ impl ChangeLog {
             group.commits.push(subject.to_uppercase_first());
         }
 
-        eprintln!("{:#?}", data);
+        // debug
+        // eprintln!("{:#?}", data);
+
+        // add history link
+        // [Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.0.0...HEAD
+        // [1.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.2...v0.0.1
+        let origin_url = get_config_origin_url()?;
+        let mut from_ref: Option<String> = None;
+        for release in data.releases.iter_mut().rev() {
+            if let Some(ref_start) = from_ref {
+                let ref_end = if release.version == "Unreleased" {
+                    "HEAD".to_string()
+                } else {
+                    release.version.clone()
+                };
+                release.history_url = format!("{}/compare/{}...{}", origin_url, ref_start, ref_end);
+            }
+            from_ref = Some(release.version.clone());
+        }
 
         // init template registry
         let mut registry = Handlebars::new();

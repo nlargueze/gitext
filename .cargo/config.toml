@@ -2,4 +2,4 @@
 gitt = "run --bin gitt --"
 
 [env]
-RUST_LOG = "trace"
+RUST_LOG = "off"
