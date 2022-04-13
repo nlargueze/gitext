@@ -27,7 +27,7 @@ pub struct Args {
     pub allow_uncommitted: bool,
     /// If set, the repo is tagged with the new version
     #[clap(long)]
-    pub add: bool,
+    pub set: bool,
 }
 
 /// Runs the command
@@ -155,7 +155,7 @@ pub fn run(args: &Args) {
     let next_version_str = next_version.to_string();
 
     // dry run
-    if !args.add {
+    if !args.set {
         debug!("Dry run: tagging skipped");
         print!("{}", next_version_str);
         exit(0);
