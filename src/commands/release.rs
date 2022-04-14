@@ -13,7 +13,7 @@ use log::debug;
 use crate::{
     changelog::ChangeLog,
     config::Config,
-    git::{git_commit, git_push, git_set_tag, git_status_porcelain},
+    git::{git_add, git_commit, git_push, git_set_tag, git_status_porcelain},
     version::{bump_repo_version, exec_bump_commands},
 };
 
@@ -180,6 +180,20 @@ pub fn run(args: &Args) {
     }
 
     // 4. Commit the changes
+    match git_add() {
+        Ok(_) => {
+            term.write_line(
+                format!("{} {}", style("✔").green(), style("Changed staged").bold()).as_str(),
+            )
+            .unwrap();
+        }
+        Err(err) => {
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
+            exit(1);
+        }
+    }
+
     let commit_msg = format!("chore(release): created release {}", next_version);
     match git_commit(&commit_msg) {
         Ok(_) => {
