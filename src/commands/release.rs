@@ -13,7 +13,7 @@ use log::debug;
 use crate::{
     changelog::ChangeLog,
     config::Config,
-    git::{git_add, git_commit, git_push, git_set_tag, git_status_porcelain},
+    git::{git_add, git_commit, git_push_follow_tags, git_set_tag, git_status_porcelain},
     version::{bump_repo_version, exec_bump_commands},
 };
 
@@ -237,9 +237,23 @@ pub fn run(args: &Args) {
 
     // 6.push the commit and tag
     if args.push {
-        match git_push() {
-            Ok(_) => {}
-            Err(_) => {}
+        match git_push_follow_tags() {
+            Ok(_) => {
+                term.write_line(
+                    format!(
+                        "{} {}",
+                        style("✔").green(),
+                        style("Pushed commit and tag").bold()
+                    )
+                    .as_str(),
+                )
+                .unwrap();
+            }
+            Err(err) => {
+                term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                    .unwrap();
+                exit(1);
+            }
         }
     }
 }
