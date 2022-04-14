@@ -1,32 +1,18 @@
-//! Init command
+//! Shared utilities for commands
 
 use std::{
     env::{current_dir, set_current_dir},
+    path::{Path, PathBuf},
     process::exit,
 };
 
-use clap::Parser;
 use console::{style, Term};
-use dialoguer::{theme::ColorfulTheme, Confirm};
 use log::debug;
 
 use crate::config::Config;
 
-/// init command arguments
-#[derive(Debug, Parser)]
-pub struct Args {
-    /// Path to the repo directory
-    #[clap(long)]
-    pub cwd: Option<String>,
-    /// Forces a reset of the repo config
-    #[clap(long)]
-    pub reset: bool,
-}
-
-/// Runs the command
-pub fn run(args: &Args) {
-    env_logger::init();
-
+/// Sets the current directory from an argument
+pub fn set_current_dir_from_arg(cwd_input: &Option<String>) -> PathBuf {
     let term = Term::stderr();
 
     let cwd = match current_dir() {
@@ -44,7 +30,7 @@ pub fn run(args: &Args) {
         }
     };
 
-    let cwd = if let Some(arg_cwd) = &args.cwd {
+    let cwd = if let Some(arg_cwd) = &cwd_input {
         cwd.join(arg_cwd)
     } else {
         cwd
@@ -67,8 +53,31 @@ pub fn run(args: &Args) {
         }
     };
 
-    if !Config::is_initialized(&cwd) {
-        match Config::default().save(&cwd) {
+    cwd
+}
+
+/// Loads the configuration
+pub fn load_config(repo_path: &Path, use_default_if_uninit: bool) -> Config {
+    let term = Term::stderr();
+
+    let config = if Config::is_initialized(repo_path) {
+        match Config::load(repo_path) {
+            Ok(cfg) => cfg,
+            Err(err) => {
+                term.write_line(
+                    style(format!("✗ Invalid config : {err}"))
+                        .red()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
+                exit(1);
+            }
+        }
+    } else if use_default_if_uninit {
+        // >> use default config
+        let default_cfg = Config::default();
+        match default_cfg.save(repo_path) {
             Ok(_) => {
                 term.write_line(
                     format!(
@@ -79,7 +88,7 @@ pub fn run(args: &Args) {
                     .as_str(),
                 )
                 .unwrap();
-                exit(0);
+                default_cfg
             }
             Err(err) => {
                 term.write_line(
@@ -92,37 +101,17 @@ pub fn run(args: &Args) {
                 .unwrap();
                 exit(1);
             }
-        };
-    }
-
-    let reset = match args.reset {
-        true => true,
-        false => Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Repo already initialized, reset ?")
-            .interact()
-            .unwrap(),
+        }
+    } else {
+        term.write_line(
+            style("✗ Missing repo config".to_string())
+                .red()
+                .to_string()
+                .as_str(),
+        )
+        .unwrap();
+        exit(1);
     };
 
-    if reset {
-        debug!("Configuration is reset");
-        match Config::default().save(&cwd) {
-            Ok(_) => {
-                term.write_line(format!("{} Regenerated config file", style("✓").green()).as_str())
-                    .unwrap();
-            }
-            Err(err) => {
-                term.write_line(
-                    style(format!("✗ Failed to recreate config file: {}", err))
-                        .red()
-                        .bold()
-                        .to_string()
-                        .as_str(),
-                )
-                .unwrap();
-                exit(1);
-            }
-        };
-    } else {
-        debug!("Configuration reset aborted");
-    }
+    config
 }

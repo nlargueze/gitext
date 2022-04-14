@@ -1,5 +1,8 @@
 [alias]
-gitext = "run --bin gitext --"
+git-amend = "run --bin git-amend --"
+git-c = "run --bin git-c --"
+git-install-hooks = "run --bin git-install-hooks --"
+git-lint = "run --bin git-lint --"
 
 [env]
 RUST_LOG = "off"

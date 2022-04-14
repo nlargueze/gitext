@@ -2,36 +2,21 @@
 
 Git extensions and extra tooling for repo management.
 
-## Commands summary
+## Commands
 
-- `gitt init`: Initialize the current repository.
-- `gitt install-hooks`: Install git hooks.
-- `gitt lint`: Checks that the commit message adheres to the conventional commit format.
-- `gitt commit`: adds all changes and opens a form to submit a conventional commit.
-- `gitt amend`: Amends an existing commit.
-- `gitt bump`: Bumps the version based on conventional commits.
-- `gitt changelog`: Generates the changelog from git history.
-- `gitt release`: Performs a release by generating the changelog, creating a commit, tagging the commit, pushing the tag, and optionally pushing to origin.
-
-## `gitt` commands
-
-### `gitt init`
-
-Initializes the current repository, and creates a `.gitt/config.toml` configuraton file.
-
-### `gitt install-hooks`
+### `git-install-hooks`
 
 Installs custom git hooks.
 
-### `gitt lint`
+### `git-lint`
 
-Lints the commit message.
+Lints a commit message.
 
-### `gitt commit`
+### `git-c`
 
 Adds all commits, opens a form to submit a conventional commit, and pushes the commit.
 
-### `gitt amend`
+### `git-amend`
 
 Amends the previous commit.
 

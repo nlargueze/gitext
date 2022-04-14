@@ -14,22 +14,12 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Initializes the repo
-    Init(commands::init::Args),
-    /// Commits the current changes
-    Commit(commands::commit::Args),
-    /// Amends the last commit
-    Amend(commands::amend::Args),
-    /// Lints a commit message
-    Lint(commands::lint::Args),
     /// Bump a version
     Bump(commands::bump::Args),
     /// Creates a changelog
     Changelog(commands::changelog::Args),
     /// Creates a release
     Release(commands::release::Args),
-    /// Install git hooks
-    InstallHooks(commands::install_hooks::Args),
 }
 
 fn main() {
@@ -38,18 +28,6 @@ fn main() {
     // You can check for the existence of subcommands, and if found use their
     // matches just as you would the top level cmd
     match &cli.command {
-        Commands::Init(args) => {
-            commands::init::run(args);
-        }
-        Commands::Commit(args) => {
-            commands::commit::run(args);
-        }
-        Commands::Amend(args) => {
-            commands::amend::run(args);
-        }
-        Commands::Lint(args) => {
-            commands::lint::run(args);
-        }
         Commands::Bump(args) => {
             commands::bump::run(args);
         }
@@ -58,9 +36,6 @@ fn main() {
         }
         Commands::Release(args) => {
             commands::release::run(args);
-        }
-        Commands::InstallHooks(args) => {
-            commands::install_hooks::run(args);
         }
     }
 }

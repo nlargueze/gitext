@@ -9,12 +9,21 @@ version = "0.0.1"
 name = "gitext"
 path = "src/bin/main.rs"
 
-# git-lint
-# git-convcommit: commit ~ git com
-# git-new-version
-# git changelog
-# git-release
-# git install-hooks
+[[bin]]
+name = "git-install-hooks"
+path = "src/bin/git-install-hooks.rs"
+
+[[bin]]
+name = "git-lint"
+path = "src/bin/git-lint.rs"
+
+[[bin]]
+name = "git-c"
+path = "src/bin/git-c.rs"
+
+[[bin]]
+name = "git-amend"
+path = "src/bin/git-amend.rs"
 
 [dependencies]
 atty = "0.2.14"

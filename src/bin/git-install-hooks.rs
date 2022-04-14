@@ -1,83 +1,38 @@
-//! Install custom hooks
+//! Installs custom hooks
 
-use std::{
-    env::{current_dir, set_current_dir},
-    fs,
-    os::unix::prelude::PermissionsExt,
-    process::exit,
-};
+use std::{fs, os::unix::prelude::PermissionsExt, process::exit};
 
 use clap::Parser;
-use console::{style, Term};
-use log::debug;
 
-use crate::{config::Config, git::get_config_install_hooks, hooks::create_git_hooks_scripts};
+use console::{style, Term};
+use gitext::{
+    commands::shared::{load_config, set_current_dir_from_arg},
+    git::get_config_install_hooks,
+    hooks::create_git_hooks_scripts,
+};
+use log::debug;
 
 /// install-hooks command arguments
 #[derive(Debug, Parser)]
-pub struct Args {
+#[clap(author, version, about = "Installs custom hooks")]
+pub struct Cli {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
 }
 
-/// Runs the command
-pub fn run(args: &Args) {
+fn main() {
     env_logger::init();
+
     let term = Term::stderr();
 
-    let cwd = match current_dir() {
-        Ok(path) => path,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Internal error: {err}"))
-                    .red()
-                    .bold()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    let args = Cli::parse();
 
-    let cwd = if let Some(arg_cwd) = &args.cwd {
-        cwd.join(arg_cwd)
-    } else {
-        cwd
-    };
-
-    // set the current directory
-    match set_current_dir(&cwd) {
-        Ok(_) => {
-            debug!("Current directory set to {}", cwd.display());
-        }
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Failed to set current directory: {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    // set CWD
+    let cwd = set_current_dir_from_arg(&args.cwd);
 
     // load the config
-    let config = match Config::load(&cwd) {
-        Ok(cfg) => cfg,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Missing or invalid config : {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    let config = load_config(&cwd, true);
 
     // create the hooks dir
     let hooks_dir = config.hooks_folder(&cwd);
