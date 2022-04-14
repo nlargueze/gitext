@@ -71,13 +71,22 @@ impl Default for ChangeLogConfig {
     }
 }
 
+/// Bump configuration
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct BumpConfig {
+    /// Commands to execute when the version is bumped
+    pub commands: Vec<String>,
+}
+
 /// Configuration object
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Config {
     /// Commits config
-    pub commits: CommitsConfig,
+    pub commit: CommitsConfig,
     /// Changelog config
     pub changelog: ChangeLogConfig,
+    /// Bump config
+    pub bump: BumpConfig,
 }
 
 impl Config {
@@ -105,12 +114,12 @@ impl Config {
 
     /// Returns a list of valid types
     pub fn valid_types(&self) -> Vec<String> {
-        self.commits.types.keys().cloned().collect()
+        self.commit.types.keys().cloned().collect()
     }
 
     /// Checks if a commit type causes a minor increment
     pub fn type_is_minor_inc(&self, commit_type: &str) -> bool {
-        self.commits
+        self.commit
             .types_inc_minor
             .contains(&commit_type.to_string())
     }

@@ -25,9 +25,9 @@ pub struct Args {
     /// Allows uncommitted changes when setting the tag
     #[clap(long)]
     pub allow_uncommitted: bool,
-    /// If set, the repo new version is printed but not set
+    /// If set, the repo is tagged with the new version
     #[clap(long)]
-    pub print_only: bool,
+    pub tag: bool,
 }
 
 /// Runs the command
@@ -155,14 +155,12 @@ pub fn run(args: &Args) {
     let next_version_str = next_version.to_string();
 
     // dry run
-    if args.print_only {
-        debug!("Print only: tagging skipped");
+    if !args.tag {
         print!("{}", next_version_str);
         exit(0);
     }
 
     // Tag the repo with the new version
-
     match git_set_tag(
         &next_version_str,
         format!("Version v{next_version_str}").as_str(),
@@ -184,6 +182,35 @@ pub fn run(args: &Args) {
             exit(1);
         }
     }
+
+    // // execute other commands to bump the package(s) version
+    // for cfg_command in config.bump.commands {
+    //     let cmd = cfg_command.replace("{{VERSION}}", &next_version_str);
+    //     let cmd_args: Vec<&str> = cmd.split(' ').collect();
+    //     match Command::new(&cmd_args[0]).args(&cmd_args[0..]).output() {
+    //         Ok(_) => {
+    //             term.write_line(
+    //                 format!(
+    //                     "{} {}",
+    //                     style("✔").green(),
+    //                     style(format!("Executed: {cmd}")).bold()
+    //                 )
+    //                 .as_str(),
+    //             )
+    //             .unwrap();
+    //         }
+    //         Err(err) => {
+    //             term.write_line(
+    //                 style(format!("✗ Failed to execute command '{cmd}': {err}"))
+    //                     .red()
+    //                     .to_string()
+    //                     .as_str(),
+    //             )
+    //             .unwrap();
+    //             exit(1);
+    //         }
+    //     };
+    // }
 
     print!("{}", next_version_str);
 }

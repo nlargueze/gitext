@@ -92,13 +92,13 @@ pub fn run(args: &Args) {
     // > type
     let r#type = {
         let commit_types: Vec<_> = config
-            .commits
+            .commit
             .types
             .iter()
             .map(|(k, v)| format!("{}: {}", k, v))
             .collect();
         let commit_types_keys: Vec<_> = config
-            .commits
+            .commit
             .types
             .iter()
             .map(|(k, _v)| k.to_string())

@@ -1,7 +1,7 @@
-[commits]
+[commit]
 types_inc_minor = ["feat"]
 
-[commits.types]
+[commit.types]
 build = "Build system"
 cd = "Continuous Delivery"
 chore = "Other changes"
@@ -26,3 +26,6 @@ perf = "Performance Improvements"
 refactor = "Code refactoring"
 style = "Code styling changes"
 test = "Tests"
+
+[bump]
+commands = ["cargo bump {{VERSION}}"]
