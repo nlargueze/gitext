@@ -1,9 +1,10 @@
 [package]
+description = "Git extensions and tools"
 edition = "2021"
+license = "MIT"
 name = "gitext"
+repository = "https://github.com/nlargueze/gitext"
 version = "0.0.1"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
 name = "git-install-hooks"
