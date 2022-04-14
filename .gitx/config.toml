@@ -15,7 +15,7 @@ style = "Code styling"
 test = "Tests"
 
 [hooks]
-pre-commit = ["cargo hello"]
+pre-commit = ["cargo clippy"]
 
 [changelog.types]
 build = "Build system"

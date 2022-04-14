@@ -81,8 +81,7 @@ fn main() {
 
     // generate the files
     for (key, script) in scripts {
-        let mut script_file = hooks_dir.join(&key);
-        script_file.set_extension("sh");
+        let script_file = hooks_dir.join(&key);
         match fs::write(&script_file, script) {
             Ok(_) => {
                 fs::set_permissions(&script_file, fs::Permissions::from_mode(0o755)).unwrap();
