@@ -196,7 +196,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gitt"
+name = "gitext"
 version = "0.0.1"
 dependencies = [
  "atty",

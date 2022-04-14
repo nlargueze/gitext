@@ -1,5 +1,5 @@
 [alias]
-gitt = "run --bin gitt --"
+gitext = "run --bin gitext --"
 
 [env]
 RUST_LOG = "off"

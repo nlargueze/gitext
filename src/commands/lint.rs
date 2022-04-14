@@ -99,7 +99,7 @@ pub fn run(args: &Args) {
     };
 
     // validate the commit message
-    let _commit = match ConventionalCommitMessage::parse(&commit, &config.valid_types()) {
+    let _commit = match ConventionalCommitMessage::parse(&commit, &config.valid_commit_types()) {
         Ok(c) => {
             term.write_line(
                 format!(

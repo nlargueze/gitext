@@ -15,8 +15,6 @@ style = "Code styling"
 test = "Tests"
 
 [hooks]
-pre-commit = ["cargo hello", "cargo build2"]
-
 [changelog.types]
 build = "Build system"
 cd = "Continuous Delivery"

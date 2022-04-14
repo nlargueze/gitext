@@ -262,7 +262,7 @@ pub fn run(args: &Args) {
     let commit_msg = commit.to_string();
 
     // validate the commit message
-    match ConventionalCommitMessage::parse(&commit_msg, &config.valid_types()) {
+    match ConventionalCommitMessage::parse(&commit_msg, &config.valid_commit_types()) {
         Ok(_) => {}
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())

@@ -119,7 +119,7 @@ impl ChangeLog {
 
             // > get type and subject from the message
             let (r#type, subject) =
-                match ConventionalCommitMessage::parse(&c.message, &config.valid_types()) {
+                match ConventionalCommitMessage::parse(&c.message, &config.valid_commit_types()) {
                     Ok(c) => (c.r#type.clone(), c.subject.clone()),
                     Err(err) => {
                         // NB: add as a specific group

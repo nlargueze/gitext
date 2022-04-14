@@ -2,7 +2,7 @@
 
 use clap::{Parser, Subcommand};
 
-use gitt::commands;
+use gitext::commands;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]

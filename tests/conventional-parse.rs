@@ -1,13 +1,14 @@
 //! Testing of conventional commits parsing
 
-use gitt::{config::Config, conventional::ConventionalCommitMessage};
+use gitext::{config::Config, conventional::ConventionalCommitMessage};
 use indoc::indoc;
 
 #[test]
 fn oneliner_simple() {
     let msg = indoc!("fix: commit subject");
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -26,7 +27,8 @@ fn oneliner_simple() {
 fn oneliner_scope() {
     let msg = indoc!("fix(myscope): commit subject");
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -45,7 +47,8 @@ fn oneliner_scope() {
 fn oneliner_breaking() {
     let msg = indoc!("fix!: commit subject");
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -64,7 +67,8 @@ fn oneliner_breaking() {
 fn oneliner_scope_breaking() {
     let msg = indoc!("fix(myscope)!: commit subject");
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -87,7 +91,8 @@ fn body_simple() {
     commit body"
     );
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -111,7 +116,8 @@ fn body_multiline_simple() {
     commit body line 2"
     );
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -138,7 +144,8 @@ fn body_multiline_breaking_change_no_issues() {
     on several line"
     );
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -166,7 +173,8 @@ fn body_multiline_breaking_change_issues() {
     Closes #1"
     );
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -192,7 +200,8 @@ fn body_multiline_issues() {
     Closes #1"
     );
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,
@@ -219,7 +228,8 @@ fn body_multiline_issues_2() {
     Closes #2"
     );
 
-    let commit = ConventionalCommitMessage::parse(msg, &Config::default().valid_types()).unwrap();
+    let commit =
+        ConventionalCommitMessage::parse(msg, &Config::default().valid_commit_types()).unwrap();
 
     assert_eq!(
         commit,

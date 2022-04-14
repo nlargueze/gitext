@@ -91,7 +91,7 @@ pub fn bump_repo_version(config: &Config) -> Result<(Version, Option<Version>)> 
 
     let mut conv_commits: Vec<ConventionalCommitMessage> = vec![];
     for c in commits {
-        match ConventionalCommitMessage::parse(&c.message, &config.valid_types()) {
+        match ConventionalCommitMessage::parse(&c.message, &config.valid_commit_types()) {
             Ok(conv_commit) => {
                 debug!("commit to version |> {}", c.message);
                 conv_commits.push(conv_commit);

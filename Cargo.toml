@@ -1,13 +1,20 @@
 [package]
 edition = "2021"
-name = "gitt"
+name = "gitext"
 version = "0.0.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "gitt"
+name = "gitext"
 path = "src/bin/main.rs"
+
+# git-lint
+# git-convcommit: commit ~ git com
+# git-new-version
+# git changelog
+# git-release
+# git install-hooks
 
 [dependencies]
 atty = "0.2.14"

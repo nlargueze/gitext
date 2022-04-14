@@ -1,6 +1,6 @@
 //! Testing of conventional commits
 
-use gitt::conventional::ConventionalCommitMessage;
+use gitext::conventional::ConventionalCommitMessage;
 use indoc::indoc;
 
 #[test]

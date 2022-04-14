@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::Result;
 
 /// Configuration directory
-pub const CONFIG_DIR: &str = ".gitt";
+pub const CONFIG_DIR: &str = ".gitx";
 
 /// Configuration file name
 pub const CONFIG_FILE: &str = "config.toml";
@@ -118,8 +118,8 @@ impl Config {
         repo_path.join(CONFIG_DIR).join(CONFIG_FILE).exists()
     }
 
-    /// Returns a list of valid types
-    pub fn valid_types(&self) -> Vec<String> {
+    /// Returns a list of valid commit types
+    pub fn valid_commit_types(&self) -> Vec<String> {
         self.commit.types.keys().cloned().collect()
     }
 

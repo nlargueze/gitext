@@ -1,4 +1,4 @@
-use gitt::commands::init;
+use gitext::commands::init;
 
 /// Initializes a new git repository
 #[test]
