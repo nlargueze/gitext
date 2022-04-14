@@ -156,6 +156,15 @@ pub fn run(args: &Args) {
 
     // dry run
     if !args.tag {
+        term.write_line(
+            format!(
+                "{} {}",
+                style("i").yellow(),
+                style("Not tagged").bold().bold(),
+            )
+            .as_str(),
+        )
+        .unwrap();
         print!("{}", next_version_str);
         exit(0);
     }
