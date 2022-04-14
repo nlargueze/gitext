@@ -1,6 +1,10 @@
 //! Configuration
 
-use std::{collections::BTreeMap, fs, path::Path};
+use std::{
+    collections::BTreeMap,
+    fs,
+    path::{Path, PathBuf},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -83,6 +87,8 @@ pub struct ReleaseConfig {
 pub struct Config {
     /// Commits config
     pub commit: CommitsConfig,
+    /// Custom hooks
+    pub hooks: BTreeMap<String, Vec<String>>,
     /// Changelog config
     pub changelog: ChangeLogConfig,
     /// Release config
@@ -122,5 +128,10 @@ impl Config {
         self.commit
             .types_inc_minor
             .contains(&commit_type.to_string())
+    }
+
+    /// Returns the folder for hook
+    pub fn hooks_folder(&self, repo_path: &Path) -> PathBuf {
+        repo_path.join(CONFIG_DIR).join("hooks")
     }
 }

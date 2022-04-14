@@ -22,6 +22,8 @@ pub enum Error {
     TemplateError(#[from] handlebars::TemplateError),
     #[error("Template render error: {0}")]
     TemplateRenderError(#[from] handlebars::RenderError),
+    #[error("Invalid hook: {0}")]
+    InvalidHook(String),
 }
 
 /// Crate result type

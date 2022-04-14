@@ -28,6 +28,8 @@ enum Commands {
     Changelog(commands::changelog::Args),
     /// Creates a release
     Release(commands::release::Args),
+    /// Install git hooks
+    InstallHooks(commands::install_hooks::Args),
 }
 
 fn main() {
@@ -56,6 +58,9 @@ fn main() {
         }
         Commands::Release(args) => {
             commands::release::run(args);
+        }
+        Commands::InstallHooks(args) => {
+            commands::install_hooks::run(args);
         }
     }
 }

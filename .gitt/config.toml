@@ -13,6 +13,10 @@ perf = "Performance Improvements"
 refactor = "Code refactoring"
 style = "Code styling"
 test = "Tests"
+
+[hooks]
+pre-commit = ["cargo hello", "cargo build2"]
+
 [changelog.types]
 build = "Build system"
 cd = "Continuous Delivery"
@@ -27,6 +31,4 @@ style = "Code styling changes"
 test = "Tests"
 
 [release]
-bump_commands = [
-  "cargo bump $NEXT_VERSION",
-]
+bump_commands = []

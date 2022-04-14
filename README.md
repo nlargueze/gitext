@@ -5,6 +5,7 @@ Tools and extensions for git.
 ## Commands summary
 
 - `gitt init`: Initialize the current repository.
+- `gitt install-hooks`: Install git hooks.
 - `gitt lint`: Checks that the commit message adheres to the conventional commit format.
 - `gitt commit`: adds all changes and opens a form to submit a conventional commit.
 - `gitt amend`: Amends an existing commit.
@@ -17,6 +18,10 @@ Tools and extensions for git.
 ### `gitt init`
 
 Initializes the current repository, and creates a `.gitt/config.toml` configuraton file.
+
+### `gitt install-hooks`
+
+Installs custom git hooks.
 
 ### `gitt lint`
 
