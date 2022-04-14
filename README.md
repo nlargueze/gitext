@@ -40,11 +40,11 @@ Generates the changelog, based on the commit range.
 
 ### `gitt release`
 
-Performs a release by generating the changelog, creating a commit, tagging the commit, pushing the tag, and optionally pushing to origin.
+Performs a release.
 
-1. Commits the current changes (if any).
-2. Creates a tag with the new version.
-3. Generates the changelog.
-4. Commits the changelog.
-5. Optionally, pushes the commit/tag to the remote.
-6. Optionally, push to another branch.
+1. Check if the repo has uncommitted changes.
+2. Generate the changelog.
+3. Bump the package(s) version.
+4. Commit the changes.
+5. Tag the commit as the next version.
+6. Optionally, push the tag and the commit to origin.

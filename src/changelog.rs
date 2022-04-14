@@ -73,18 +73,25 @@ struct ChangeLogData {
 pub struct ChangeLog {
     /// Change log template engine
     registry: Handlebars<'static>,
-    /// Changelog data
-    data: ChangeLogData,
 }
 
 impl ChangeLog {
     /// Initializes the changelog
-    pub fn init(config: &Config) -> Result<Self> {
-        // convert to conventional commits to get type
-        // assign to changelog data
+    pub fn init() -> Result<Self> {
+        // init template registry
+        let mut registry = Handlebars::new();
+        // registry.set_strict_mode(true);
+        registry.register_template_string("changelog", CHANGELOG_TEMPLATE)?;
+
+        Ok(Self { registry })
+    }
+
+    /// Generates the change log file
+    pub fn generate(&self, config: &Config, next_version: &str) -> Result<String> {
+        // parse commits
         let mut data = ChangeLogData { releases: vec![] };
         data.releases.push(ChangeLogRelease {
-            version: "Unreleased".to_string(),
+            version: next_version.to_string(),
             date: Utc::now().format("%Y-%m-%d").to_string(),
             history_url: "".to_string(),
             groups: BTreeMap::new(),
@@ -173,17 +180,8 @@ impl ChangeLog {
             from_ref = Some(release.version.clone());
         }
 
-        // init template registry
-        let mut registry = Handlebars::new();
-        // registry.set_strict_mode(true);
-        registry.register_template_string("changelog", CHANGELOG_TEMPLATE)?;
-
-        Ok(Self { registry, data })
-    }
-
-    /// Generates the change log file
-    pub fn generate(&self) -> Result<String> {
-        let txt = self.registry.render("changelog", &self.data)?;
+        // render template
+        let txt = self.registry.render("changelog", &data)?;
         Ok(txt)
     }
 }

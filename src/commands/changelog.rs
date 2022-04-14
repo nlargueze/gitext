@@ -2,16 +2,18 @@
 
 use std::{
     env::{current_dir, set_current_dir},
-    fs,
     process::exit,
 };
 
 use clap::Parser;
 use console::{style, Term};
 
+use dialoguer::{theme::ColorfulTheme, Confirm};
 use log::debug;
 
-use crate::{changelog::ChangeLog, config::Config};
+use crate::{
+    changelog::ChangeLog, config::Config, git::git_status_porcelain, version::bump_repo_version,
+};
 
 /// changelog command arguments
 #[derive(Debug, Parser)]
@@ -19,9 +21,9 @@ pub struct Args {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
-    /// If set, the changelog will be generated in the current directory
-    #[clap(long, short)]
-    pub output: Option<String>,
+    /// Allows uncommitted changes when setting the tag
+    #[clap(long)]
+    pub allow_uncommitted: bool,
 }
 
 /// Runs the command
@@ -82,8 +84,47 @@ pub fn run(args: &Args) {
         }
     };
 
+    // check if the repo is pristine
+    if !args.allow_uncommitted {
+        let commit_status = match git_status_porcelain() {
+            Ok(status) => status,
+            Err(err) => {
+                term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                    .unwrap();
+                exit(1);
+            }
+        };
+
+        if let Some(files_list) = commit_status {
+            term.write_line(
+                style("> Repo has uncommited changes:")
+                    .bold()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            term.write_line(&files_list).unwrap();
+            let ok = Confirm::with_theme(&ColorfulTheme::default())
+                .with_prompt("Tag despite uncommited changes ?")
+                .report(true)
+                .default(false)
+                .interact()
+                .unwrap();
+            if !ok {
+                term.write_line(
+                    style("✗ Uncommited changes -> skipped".to_string())
+                        .red()
+                        .to_string()
+                        .as_str(),
+                )
+                .unwrap();
+                exit(0);
+            }
+        }
+    }
+
     // init the changelog
-    let changelog = match ChangeLog::init(&config) {
+    let changelog = match ChangeLog::init() {
         Ok(cl) => cl,
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
@@ -92,8 +133,19 @@ pub fn run(args: &Args) {
         }
     };
 
+    // get the latest version based on the commit history
+    // NB: can be replaced by Unreleased tag
+    let next_version = match bump_repo_version(&config) {
+        Ok((v, _)) => v.to_string(),
+        Err(err) => {
+            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                .unwrap();
+            exit(1);
+        }
+    };
+
     // generate the change log file
-    let changelog_str = match changelog.generate() {
+    let changelog_str = match changelog.generate(&config, &next_version) {
         Ok(s) => s,
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
@@ -102,17 +154,6 @@ pub fn run(args: &Args) {
         }
     };
 
-    // save changelog to file if output argument is set
-    if let Some(o) = &args.output {
-        match fs::write(cwd.join(o), &changelog_str) {
-            Ok(_) => {}
-            Err(err) => {
-                term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
-                    .unwrap();
-                exit(1);
-            }
-        }
-    }
-
+    // print changelog
     print!("{changelog_str}");
 }
