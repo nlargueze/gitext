@@ -22,6 +22,9 @@ pub fn create_git_hooks_scripts(config: &Config) -> Result<HashMap<String, Strin
         let mut script = r"#!/bin/sh".to_string();
         script.push('\n');
         script.push('\n');
+        script.push_str(format!("echo 'i Running {key} hook'").as_str());
+        script.push('\n');
+        script.push('\n');
         for cmd in commands {
             script.push_str(cmd);
             script.push('\n');
