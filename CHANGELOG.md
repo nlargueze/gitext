@@ -21,6 +21,7 @@
 
 ### Bug fixes
 
+- Added git add to release workflow
 - Fixed changelog
 - Modified bump option &#x27;print-only&#x27; -&gt; &#x27;tag&#x27;- Replaced bump option to submit a tag explicity with --tag- Removed ability to execute extra commands when bumping
 - Fixed bump abort if no commits
