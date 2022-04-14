@@ -23,7 +23,7 @@ pub fn get_config_origin_url() -> Result<String> {
         }
     };
 
-    let stdout = stdout.strip_suffix(".git").unwrap();
+    let stdout = stdout.strip_suffix(".git").unwrap_or(&stdout);
 
     Ok(stdout.to_string())
 }

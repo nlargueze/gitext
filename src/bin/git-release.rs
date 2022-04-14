@@ -1,25 +1,21 @@
-//! release command
+//! Performs a release.
 
-use std::{
-    env::{current_dir, set_current_dir},
-    fs,
-    process::exit,
-};
+use std::{fs, process::exit};
 
 use clap::Parser;
-use console::{style, Term};
-use log::debug;
 
-use crate::{
+use console::{style, Term};
+use gitext::{
     changelog::ChangeLog,
-    config::Config,
+    commands::shared::{load_config, set_current_dir_from_arg},
     git::{git_add, git_commit, git_push_follow_tags, git_set_tag, git_status_porcelain},
     version::{bump_repo_version, exec_bump_commands},
 };
 
-/// release command arguments
+/// Release command
 #[derive(Debug, Parser)]
-pub struct Args {
+#[clap(author, version, about = "Performs a release")]
+pub struct Cli {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
@@ -28,63 +24,18 @@ pub struct Args {
     pub push: bool,
 }
 
-/// Runs the command
-pub fn run(args: &Args) {
+fn main() {
     env_logger::init();
+
     let term = Term::stderr();
 
-    let cwd = match current_dir() {
-        Ok(path) => path,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Internal error: {err}"))
-                    .red()
-                    .bold()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    let args = Cli::parse();
 
-    let cwd = if let Some(arg_cwd) = &args.cwd {
-        cwd.join(arg_cwd)
-    } else {
-        cwd
-    };
-
-    // set the current directory
-    match set_current_dir(&cwd) {
-        Ok(_) => {
-            debug!("Current directory set to {}", cwd.display());
-        }
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Failed to set current directory: {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    // set CWD
+    let cwd = set_current_dir_from_arg(&args.cwd);
 
     // load the config
-    let config = match Config::load(&cwd) {
-        Ok(cfg) => cfg,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Missing or invalid config : {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    let config = load_config(&cwd, true);
 
     // 1. check for uncommitted changes
     match git_status_porcelain() {

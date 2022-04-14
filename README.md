@@ -20,19 +20,19 @@ Adds all commits, opens a form to submit a conventional commit, and pushes the c
 
 Amends the previous commit.
 
-### `gitt bump`
+### `git-bump`
 
-Bumps the version based on the conventional commit.
+Bumps the version based on the conventional commit format.
 
-### `gitt changelog`
+### `git-changelog`
 
 Generates the changelog, based on the commit range.
 
-### `gitt release`
+### `git-release`
 
 Performs a release.
 
-1. Check if the repo has uncommitted changes.
+1. Make sure the repo does not have uncommitted changes.
 2. Generate the changelog.
 3. Bump the package(s) version.
 4. Commit the changes.

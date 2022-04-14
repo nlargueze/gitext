@@ -1,95 +1,47 @@
-//! Changelog command
+//! Bumps the version.
 
-use std::{
-    env::{current_dir, set_current_dir},
-    process::exit,
-};
+use std::process::exit;
 
 use clap::Parser;
+
 use console::{style, Term};
 use dialoguer::{theme::ColorfulTheme, Confirm};
-use log::debug;
-
-use crate::{
-    config::Config,
+use gitext::{
+    commands::shared::{load_config, set_current_dir_from_arg},
     git::{git_set_tag, git_status_porcelain},
     version::bump_repo_version,
 };
 
-/// bump command arguments
+/// Bump command
 #[derive(Debug, Parser)]
-pub struct Args {
+#[clap(author, version, about = "Bumps the version")]
+pub struct Cli {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
     /// Allows uncommitted changes when setting the tag
     #[clap(long)]
-    pub allow_uncommitted: bool,
+    pub allow_dirty: bool,
     /// If set, the repo is tagged with the new version
     #[clap(long)]
     pub tag: bool,
 }
 
-/// Runs the command
-pub fn run(args: &Args) {
+fn main() {
     env_logger::init();
+
     let term = Term::stderr();
 
-    let cwd = match current_dir() {
-        Ok(path) => path,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Internal error: {err}"))
-                    .red()
-                    .bold()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    let args = Cli::parse();
 
-    let cwd = if let Some(arg_cwd) = &args.cwd {
-        cwd.join(arg_cwd)
-    } else {
-        cwd
-    };
-
-    // set the current directory
-    match set_current_dir(&cwd) {
-        Ok(_) => {
-            debug!("Current directory set to {}", cwd.display());
-        }
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Failed to set current directory: {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    // set CWD
+    let cwd = set_current_dir_from_arg(&args.cwd);
 
     // load the config
-    let config = match Config::load(&cwd) {
-        Ok(cfg) => cfg,
-        Err(err) => {
-            term.write_line(
-                style(format!("✗ Missing or invalid config : {err}"))
-                    .red()
-                    .to_string()
-                    .as_str(),
-            )
-            .unwrap();
-            exit(1);
-        }
-    };
+    let config = load_config(&cwd, true);
 
     // check if the repo is pristine
-    if !args.allow_uncommitted {
+    if !args.allow_dirty {
         let commit_status = match git_status_porcelain() {
             Ok(status) => status,
             Err(err) => {
@@ -160,7 +112,7 @@ pub fn run(args: &Args) {
             format!(
                 "{} {}",
                 style("i").yellow(),
-                style("Not tagged").bold().bold(),
+                style("Git tag not set").bold().bold(),
             )
             .as_str(),
         )

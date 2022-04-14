@@ -6,10 +6,6 @@ version = "0.0.1"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "gitext"
-path = "src/bin/main.rs"
-
-[[bin]]
 name = "git-install-hooks"
 path = "src/bin/git-install-hooks.rs"
 
@@ -24,6 +20,18 @@ path = "src/bin/git-c.rs"
 [[bin]]
 name = "git-amend"
 path = "src/bin/git-amend.rs"
+
+[[bin]]
+name = "git-bump"
+path = "src/bin/git-bump.rs"
+
+[[bin]]
+name = "git-changelog"
+path = "src/bin/git-changelog.rs"
+
+[[bin]]
+name = "git-release"
+path = "src/bin/git-release.rs"
 
 [dependencies]
 atty = "0.2.14"

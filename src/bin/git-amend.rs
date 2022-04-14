@@ -6,7 +6,7 @@ use clap::Parser;
 
 use console::{style, Term};
 use gitext::{
-    commands::shared::{load_config, set_current_dir_from_arg},
+    commands::shared::set_current_dir_from_arg,
     git::{git_add, git_commit_amend, git_push},
 };
 use log::debug;
@@ -31,10 +31,7 @@ fn main() {
     let args = Cli::parse();
 
     // set CWD
-    let cwd = set_current_dir_from_arg(&args.cwd);
-
-    // load the config
-    let config = load_config(&cwd, true);
+    let _cwd = set_current_dir_from_arg(&args.cwd);
 
     // git add -A
     term.write_line("Staging changes …").unwrap();
