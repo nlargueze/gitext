@@ -105,7 +105,8 @@ fn main() {
     }
 
     // add to git config
-    match get_config_install_hooks(&hooks_dir) {
+    let hooks_dir_short = hooks_dir.strip_prefix(&cwd).unwrap();
+    match get_config_install_hooks(hooks_dir_short) {
         Ok(_) => {
             term.write_line(
                 format!(
