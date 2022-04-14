@@ -1,5 +1,7 @@
 //! Version management
 
+use std::process::Command;
+
 use log::{debug, warn};
 use semver::{BuildMetadata, Prerelease, Version};
 
@@ -163,4 +165,25 @@ pub fn get_latest_repo_tag() -> Result<Option<SemverGitTag>> {
 
     // get the latest version
     Ok(versions.last().cloned())
+}
+
+/// Executes the extra bump commands
+pub fn exec_bump_commands(config: &Config, version: &str) -> Result<Vec<String>> {
+    // execute other commands to bump the package(s) version
+    let mut executed_cmds = Vec::<String>::new();
+    for cfg_command in &config.release.bump_commands {
+        let cmd = cfg_command.replace("$NEXT_VERSION", version);
+        let cmd_args: Vec<&str> = cmd.split(' ').collect();
+        match Command::new(&cmd_args[0]).args(&cmd_args[0..]).output() {
+            Ok(_) => {
+                executed_cmds.push(cmd);
+            }
+            Err(err) => {
+                return Err(Error::InternalError(format!(
+                    "✗ Failed to execute command '{cmd}': {err}"
+                )));
+            }
+        };
+    }
+    Ok(executed_cmds)
 }

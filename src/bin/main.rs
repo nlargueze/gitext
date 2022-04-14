@@ -26,6 +26,8 @@ enum Commands {
     Bump(commands::bump::Args),
     /// Creates a changelog
     Changelog(commands::changelog::Args),
+    /// Creates a release
+    Release(commands::release::Args),
 }
 
 fn main() {
@@ -51,6 +53,9 @@ fn main() {
         }
         Commands::Changelog(args) => {
             commands::changelog::run(args);
+        }
+        Commands::Release(args) => {
+            commands::release::run(args);
         }
     }
 }

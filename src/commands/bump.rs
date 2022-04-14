@@ -192,34 +192,5 @@ pub fn run(args: &Args) {
         }
     }
 
-    // // execute other commands to bump the package(s) version
-    // for cfg_command in config.bump.commands {
-    //     let cmd = cfg_command.replace("{{VERSION}}", &next_version_str);
-    //     let cmd_args: Vec<&str> = cmd.split(' ').collect();
-    //     match Command::new(&cmd_args[0]).args(&cmd_args[0..]).output() {
-    //         Ok(_) => {
-    //             term.write_line(
-    //                 format!(
-    //                     "{} {}",
-    //                     style("✔").green(),
-    //                     style(format!("Executed: {cmd}")).bold()
-    //                 )
-    //                 .as_str(),
-    //             )
-    //             .unwrap();
-    //         }
-    //         Err(err) => {
-    //             term.write_line(
-    //                 style(format!("✗ Failed to execute command '{cmd}': {err}"))
-    //                     .red()
-    //                     .to_string()
-    //                     .as_str(),
-    //             )
-    //             .unwrap();
-    //             exit(1);
-    //         }
-    //     };
-    // }
-
     print!("{}", next_version_str);
 }

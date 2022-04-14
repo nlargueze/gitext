@@ -71,11 +71,11 @@ impl Default for ChangeLogConfig {
     }
 }
 
-/// Bump configuration
+/// Release configuration
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct BumpConfig {
+pub struct ReleaseConfig {
     /// Commands to execute when the version is bumped
-    pub commands: Vec<String>,
+    pub bump_commands: Vec<String>,
 }
 
 /// Configuration object
@@ -85,8 +85,8 @@ pub struct Config {
     pub commit: CommitsConfig,
     /// Changelog config
     pub changelog: ChangeLogConfig,
-    /// Bump config
-    pub bump: BumpConfig,
+    /// Release config
+    pub release: ReleaseConfig,
 }
 
 impl Config {

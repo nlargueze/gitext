@@ -6,3 +6,4 @@ pub mod changelog;
 pub mod commit;
 pub mod init;
 pub mod lint;
+pub mod release;

@@ -13,7 +13,6 @@ perf = "Performance Improvements"
 refactor = "Code refactoring"
 style = "Code styling"
 test = "Tests"
-
 [changelog.types]
 build = "Build system"
 cd = "Continuous Delivery"
@@ -27,5 +26,7 @@ refactor = "Code refactoring"
 style = "Code styling changes"
 test = "Tests"
 
-[bump]
-commands = ["cargo bump {{VERSION}}"]
+[release]
+bump_commands = [
+  "cargo bump $NEXT_VERSION",
+]
