@@ -19,6 +19,9 @@ pub struct Cli {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
+    /// If set, the changelog and tag are committed
+    #[clap(long, short)]
+    pub commit: bool,
     /// If set, commits and tags are pushed
     #[clap(long, short)]
     pub push: bool,
@@ -71,8 +74,8 @@ fn main() {
         }
     };
 
-    let next_version = match bump_repo_version(&config) {
-        Ok((v, _)) => v.to_string(),
+    let (next_version, prev_version) = match bump_repo_version(&config) {
+        Ok((next_version, prev_version)) => (next_version, prev_version),
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
                 .unwrap();
@@ -80,7 +83,7 @@ fn main() {
         }
     };
 
-    let changelog_str = match changelog.generate(&config, &next_version) {
+    let changelog_str = match changelog.generate(&config, &next_version.to_string()) {
         Ok(s) => s,
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
@@ -88,6 +91,36 @@ fn main() {
             exit(1);
         }
     };
+
+    if !args.commit {
+        term.write_line(
+            format!(
+                "{} {}",
+                style("i").green(),
+                style(format!(
+                    "{} --> {}",
+                    prev_version
+                        .map(|v| v.to_string())
+                        .unwrap_or_else(|| "<none>".to_string()),
+                    next_version
+                ))
+                .bold()
+            )
+            .as_str(),
+        )
+        .unwrap();
+        term.write_line(
+            format!(
+                "{} {}",
+                style("i").green(),
+                style("CHANGELOG ↴".to_string()).bold()
+            )
+            .as_str(),
+        )
+        .unwrap();
+        println!("{changelog_str}");
+        exit(0);
+    }
 
     match fs::write(cwd.join("CHANGELOG.md"), changelog_str) {
         Ok(_) => {
@@ -109,7 +142,7 @@ fn main() {
     }
 
     // 3. Bump the package versions
-    match exec_bump_commands(&config, &next_version) {
+    match exec_bump_commands(&config, &next_version.to_string()) {
         Ok(exec_commands) => {
             for cmd in exec_commands {
                 term.write_line(
@@ -167,7 +200,7 @@ fn main() {
 
     // 5. Tag the commit
     let tag_msg = format!("Release {next_version}");
-    match git_set_tag(&next_version, &tag_msg) {
+    match git_set_tag(&next_version.to_string(), &tag_msg) {
         Ok(_) => {
             term.write_line(
                 format!(
