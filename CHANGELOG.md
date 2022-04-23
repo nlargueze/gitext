@@ -1,8 +1,20 @@
 # Changelog All notable changes to this project will be documented in this file.
 
+## [0.0.5] - 2022-04-23
+
+https://github.com/nlargueze/gitext/compare/0.0.4...0.0.5
+
+### Bug fixes
+
+- Fixed Cargo.lock file
+
 ## [0.0.4] - 2022-04-23
 
 https://github.com/nlargueze/gitext/compare/0.0.3...0.0.4
+
+### Other changes
+
+- Created release 0.0.4
 
 ### Bug fixes
 
