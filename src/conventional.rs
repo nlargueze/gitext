@@ -105,7 +105,6 @@ impl ConventionalCommitMessage {
 
         for (i, line_res) in s.as_bytes().lines().enumerate() {
             let line = line_res?;
-            // eprint!("{i} {line}");
 
             // >> 1st line
             if i == 0 {

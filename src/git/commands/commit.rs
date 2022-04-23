@@ -93,6 +93,7 @@ pub fn git_log(log_range: &str) -> Result<Vec<GitCommit>> {
             commits.push(commit);
             commit = GitCommit::default();
         } else {
+            commit.message.push('\n');
             commit.message.push_str(line);
         }
     }

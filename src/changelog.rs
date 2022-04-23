@@ -103,6 +103,8 @@ impl ChangeLog {
         let tags = git_get_tags()?.into_semver()?;
 
         for c in commits {
+            // eprintln!("{:#?}", c);
+
             let commit_tag = tags.iter().find(|t| t.tag.commit_hash == c.id);
             match commit_tag {
                 Some(t) => {
