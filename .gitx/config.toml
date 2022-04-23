@@ -32,5 +32,6 @@ test = "Tests"
 
 [release]
 bump_commands = [
-  "cargo set-version {{version}} && cargo update",
+  "cargo set-version {{version}}",
+  "cargo update",
 ]
