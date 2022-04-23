@@ -7,7 +7,7 @@ use clap::Parser;
 use console::{style, Term};
 use gitext::{
     commands::shared::{load_config, set_current_dir_from_arg},
-    git::get_config_install_hooks,
+    git::set_config_install_hooks,
     hooks::create_git_hooks_scripts,
 };
 use log::debug;
@@ -33,7 +33,6 @@ fn main() {
 
     // load the config
     let config = load_config(&cwd, true);
-    eprintln!("{:?}", config);
 
     // create the hooks dir
     let hooks_dir = config.hooks_folder();
@@ -105,8 +104,8 @@ fn main() {
     }
 
     // add to git config
-    let hooks_dir_short = hooks_dir.strip_prefix(&cwd).unwrap();
-    match get_config_install_hooks(hooks_dir_short) {
+    let hooks_dir_short = hooks_dir.strip_prefix(&config.root_dir).unwrap();
+    match set_config_install_hooks(hooks_dir_short) {
         Ok(_) => {
             term.write_line(
                 format!(

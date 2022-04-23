@@ -31,7 +31,7 @@ pub fn get_config_origin_url() -> Result<String> {
 /// Sets the git hooks directory.
 ///
 /// `git config core.hookspath ${dir}`
-pub fn get_config_install_hooks(dir: &Path) -> Result<()> {
+pub fn set_config_install_hooks(dir: &Path) -> Result<()> {
     let dir_str_lossy = dir.to_string_lossy();
     let dir_str = dir_str_lossy.as_ref();
     let output = Command::new("git")
