@@ -19,6 +19,9 @@ pub struct Cli {
     /// Path to the repo directory
     #[clap(long)]
     pub cwd: Option<String>,
+    /// Allows uncommitted changes when creating the release
+    #[clap(long)]
+    pub allow_dirty: bool,
     /// If set, the changelog and tag are committed
     #[clap(long, short)]
     pub commit: bool,
@@ -44,17 +47,30 @@ fn main() {
     match git_status_porcelain() {
         Ok(status) => {
             if let Some(files_list) = status {
-                term.write_line(
-                    style("✗ Repo has uncommited changes:")
-                        .red()
-                        .bold()
-                        .to_string()
-                        .as_str(),
-                )
-                .unwrap();
-                term.write_line(style(&files_list).red().to_string().as_str())
+                if args.allow_dirty {
+                    term.write_line(
+                        style("i Repo has uncommited changes:")
+                            .yellow()
+                            .bold()
+                            .to_string()
+                            .as_str(),
+                    )
                     .unwrap();
-                exit(1);
+                    term.write_line(style(&files_list).yellow().to_string().as_str())
+                        .unwrap();
+                } else {
+                    term.write_line(
+                        style("✗ Repo has uncommited changes:")
+                            .red()
+                            .bold()
+                            .to_string()
+                            .as_str(),
+                    )
+                    .unwrap();
+                    term.write_line(style(&files_list).red().to_string().as_str())
+                        .unwrap();
+                    exit(1);
+                }
             }
         }
         Err(err) => {
