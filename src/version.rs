@@ -174,7 +174,11 @@ pub fn exec_bump_commands(config: &Config, version: &str) -> Result<Vec<String>>
     for cfg_command in &config.release.bump_commands {
         let cmd = cfg_command.replace("{{version}}", version);
         let cmd_args: Vec<&str> = cmd.split(' ').collect();
-        let output = match Command::new(&cmd_args[0]).args(&cmd_args[1..]).output() {
+        let output = match Command::new(&cmd_args[0])
+            .args(&cmd_args[1..])
+            .current_dir(&config.root_dir)
+            .output()
+        {
             Ok(output) => {
                 executed_cmds.push(cmd.clone());
                 output
