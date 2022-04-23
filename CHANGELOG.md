@@ -1,8 +1,20 @@
 # Changelog All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2022-04-23
+
+https://github.com/nlargueze/gitext/compare/0.0.3...0.0.4
+
+### Bug fixes
+
+- Fixedcustom bumop scripts execution
+
 ## [0.0.3] - 2022-04-23
 
 https://github.com/nlargueze/gitext/compare/0.0.1...0.0.3
+
+### Other changes
+
+- Created release 0.0.3
 
 ### New features
 
