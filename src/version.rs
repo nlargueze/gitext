@@ -172,22 +172,26 @@ pub fn exec_bump_commands(config: &Config, version: &str) -> Result<Vec<String>>
     // execute other commands to bump the package(s) version
     let mut executed_cmds = Vec::<String>::new();
     for cfg_command in &config.release.bump_commands {
-        let cmd_str = format!("{} ($VERSION={})", cfg_command, version);
-        let cmd_args: Vec<&str> = cfg_command.split(' ').collect();
-        match Command::new(&cmd_args[0])
-            .env("VERSION", version)
-            .args(&cmd_args[0..])
-            .output()
-        {
-            Ok(_) => {
-                executed_cmds.push(cmd_str);
+        let cmd = cfg_command.replace("{{version}}", version);
+        let cmd_args: Vec<&str> = cmd.split(' ').collect();
+        let output = match Command::new(&cmd_args[0]).args(&cmd_args[1..]).output() {
+            Ok(output) => {
+                executed_cmds.push(cmd.clone());
+                output
             }
             Err(err) => {
                 return Err(Error::InternalError(format!(
-                    "✗ Failed to execute command '{cmd_str}': {err}"
+                    "✗ Failed to execute command '{cmd}': {err}"
                 )));
             }
         };
+
+        if !output.status.success() {
+            return Err(Error::InternalError(format!(
+                "✗ Failed to execute command '{cmd}': {}",
+                String::from_utf8_lossy(&output.stderr)
+            )));
+        }
     }
     Ok(executed_cmds)
 }
