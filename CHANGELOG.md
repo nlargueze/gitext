@@ -1,8 +1,21 @@
 # Changelog All notable changes to this project will be documented in this file.
 
+## [0.0.7] - 2022-04-23
+
+https://github.com/nlargueze/gitext/compare/0.0.6...0.0.7
+
+### Bug fixes
+
+- Fixing bump script
+- Fixing bumping script
+
 ## [0.0.6] - 2022-04-23
 
 https://github.com/nlargueze/gitext/compare/0.0.5...0.0.6
+
+### Other changes
+
+- Created release 0.0.6
 
 ### Bug fixes
 
