@@ -197,7 +197,7 @@ dependencies = [
 
 [[package]]
 name = "gitext"
-version = "0.0.1"
+version = "0.0.4"
 dependencies = [
  "atty",
  "chrono",
