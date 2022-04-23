@@ -103,7 +103,7 @@ impl ChangeLog {
         let tags = git_get_tags()?.into_semver()?;
 
         for c in commits {
-            let commit_tag = tags.iter().find(|t| t.tag.hash == c.id);
+            let commit_tag = tags.iter().find(|t| t.tag.commit_hash == c.id);
             match commit_tag {
                 Some(t) => {
                     // commit has a tag which means that it is another version

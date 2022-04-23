@@ -9,8 +9,10 @@ use chrono::{DateTime, Utc};
 pub struct GitTag {
     /// Tag name
     pub tag: String,
-    /// Tag commmit hash
+    /// Tag hash
     pub hash: String,
+    /// Tag commmit hash
+    pub commit_hash: String,
     /// Tag date
     pub date: DateTime<Utc>,
     /// Tag message

@@ -1,6 +1,6 @@
 //! Get/Set tags
 
-use std::process::Command;
+use std::{collections::HashMap, process::Command};
 
 use chrono::{DateTime, FixedOffset, Utc};
 
@@ -11,6 +11,42 @@ use crate::{
 
 /// Wrapper for `git tag --list`
 pub fn git_get_tags() -> Result<Vec<GitTag>> {
+    let output = Command::new("git")
+        .args(["show-ref", "--tags", "--dereference"])
+        .output()?;
+    if !output.status.success() {
+        return Err(Error::InternalError(
+            "Failed to get git tag refs".to_string(),
+        ));
+    }
+    let hash_ref_map: HashMap<_, _> = String::from_utf8(output.stdout)
+        .unwrap()
+        .lines()
+        .map(|line| {
+            let parts: Vec<_> = line.splitn(2, ' ').collect();
+            if parts.len() != 2 {
+                panic!("Invalid tag line: {}", line);
+            }
+            let hash = parts[0];
+            let r#ref = parts[1];
+            (hash.to_string(), r#ref.to_string())
+        })
+        .collect();
+
+    let mut annotated_tags_commits: HashMap<String, String> = HashMap::new();
+    for (hash, r#ref) in hash_ref_map {
+        if r#ref.ends_with("^{}") {
+            let tag_short_ref = r#ref
+                .strip_prefix("refs/tags/")
+                .unwrap()
+                .strip_suffix("^{}")
+                .unwrap()
+                .to_string();
+            annotated_tags_commits.insert(tag_short_ref, hash);
+        }
+    }
+
+    // get all tags
     let output = Command::new("git")
         .args([
             "tag",
@@ -37,6 +73,10 @@ pub fn git_get_tags() -> Result<Vec<GitTag>> {
             GitTag {
                 tag: tag_str.to_string(),
                 hash: hash_str.to_string(),
+                commit_hash: annotated_tags_commits
+                    .get(tag_str)
+                    .cloned()
+                    .unwrap_or_else(|| hash_str.to_string()),
                 date: DateTime::<FixedOffset>::parse_from_rfc3339(dt_str)
                     .unwrap()
                     .with_timezone(&Utc),
