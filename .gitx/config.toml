@@ -31,4 +31,6 @@ style = "Code styling changes"
 test = "Tests"
 
 [release]
-bump_commands = []
+bump_commands = [
+  "cargo bump $VERSION",
+]
