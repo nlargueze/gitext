@@ -183,7 +183,7 @@ fn main() {
     match git_add() {
         Ok(_) => {
             term.write_line(
-                format!("{} {}", style("✔").green(), style("Changed staged").bold()).as_str(),
+                format!("{} {}", style("✔").green(), style("Staged changes").bold()).as_str(),
             )
             .unwrap();
         }
