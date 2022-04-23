@@ -1,4 +1,4 @@
-//! Gitt CLI support library
+//! `gitext` CLI support library
 
 #![deny(missing_docs)]
 

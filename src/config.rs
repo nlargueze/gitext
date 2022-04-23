@@ -85,6 +85,9 @@ pub struct ReleaseConfig {
 /// Configuration object
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Config {
+    /// Root directory
+    #[serde(skip)]
+    pub root_dir: PathBuf,
     /// Commits config
     pub commit: CommitsConfig,
     /// Custom hooks
@@ -96,11 +99,17 @@ pub struct Config {
 }
 
 impl Config {
-    /// Loads the configuration file from the repo
-    pub fn load(repo_path: &Path) -> Result<Self> {
-        let file = repo_path.join(CONFIG_DIR).join(CONFIG_FILE);
-        let cfg_str = fs::read_to_string(file)?;
-        Ok(toml::from_str::<Config>(&cfg_str)?)
+    /// Loads the configuration file for the current working directory
+    pub fn load(repo_path: &Path) -> Result<Option<Self>> {
+        let cfg_file = repo_path.join(CONFIG_DIR).join(CONFIG_FILE);
+        if cfg_file.exists() {
+            let cfg_str = fs::read_to_string(&cfg_file)?;
+            let mut cfg = toml::from_str::<Config>(&cfg_str)?;
+            cfg.root_dir = repo_path.to_path_buf();
+            Ok(Some(cfg))
+        } else {
+            Ok(None)
+        }
     }
 
     /// Saves a [Configuration] to the repo
@@ -111,11 +120,6 @@ impl Config {
         }
         fs::write(repo_path.join(CONFIG_DIR).join(CONFIG_FILE), cfg_str)?;
         Ok(())
-    }
-
-    /// Checks if a repo is already initialized
-    pub fn is_initialized(repo_path: &Path) -> bool {
-        repo_path.join(CONFIG_DIR).join(CONFIG_FILE).exists()
     }
 
     /// Returns a list of valid commit types
@@ -131,7 +135,7 @@ impl Config {
     }
 
     /// Returns the folder for hook
-    pub fn hooks_folder(&self, repo_path: &Path) -> PathBuf {
-        repo_path.join(CONFIG_DIR).join("hooks")
+    pub fn hooks_folder(&self) -> PathBuf {
+        self.root_dir.join(CONFIG_DIR).join("hooks")
     }
 }

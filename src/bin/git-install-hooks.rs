@@ -33,9 +33,10 @@ fn main() {
 
     // load the config
     let config = load_config(&cwd, true);
+    eprintln!("{:?}", config);
 
     // create the hooks dir
-    let hooks_dir = config.hooks_folder(&cwd);
+    let hooks_dir = config.hooks_folder();
     if hooks_dir.exists() {
         match fs::remove_dir_all(&hooks_dir) {
             Ok(_) => {
@@ -111,7 +112,7 @@ fn main() {
                 format!(
                     "{} {}",
                     style("✔").green(),
-                    style("Added .gitt/hooks folder to git config core.hooksPath").bold()
+                    style("Added .gitx/hooks folder to git config core.hooksPath").bold()
                 )
                 .as_str(),
             )

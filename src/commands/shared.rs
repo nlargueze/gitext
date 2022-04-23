@@ -7,6 +7,7 @@ use std::{
 };
 
 use console::{style, Term};
+use dialoguer::{theme::ColorfulTheme, Confirm};
 use log::debug;
 
 use crate::config::Config;
@@ -56,16 +57,29 @@ pub fn set_current_dir_from_arg(cwd_input: &Option<String>) -> PathBuf {
     cwd
 }
 
-/// Loads the configuration
-pub fn load_config(repo_path: &Path, use_default_if_uninit: bool) -> Config {
+/// Loads the configuration recursively from the current directory
+pub fn load_config(cwd: &Path, ask_for_creation: bool) -> Config {
     let term = Term::stderr();
 
-    let config = if Config::is_initialized(repo_path) {
-        match Config::load(repo_path) {
-            Ok(cfg) => cfg,
+    // recursive lookup
+    let mut cfg: Option<Config> = None;
+    let mut currdir = cwd.to_owned();
+    'rec: while cfg.is_none() {
+        match Config::load(&currdir) {
+            Ok(c) => match c {
+                Some(x) => {
+                    cfg = Some(x);
+                }
+                None => {
+                    let popped = currdir.pop();
+                    if !popped {
+                        break 'rec;
+                    }
+                }
+            },
             Err(err) => {
                 term.write_line(
-                    style(format!("✗ Invalid config : {err}"))
+                    style(format!("✗ Error loading config : {err}"))
                         .red()
                         .to_string()
                         .as_str(),
@@ -74,44 +88,67 @@ pub fn load_config(repo_path: &Path, use_default_if_uninit: bool) -> Config {
                 exit(1);
             }
         }
-    } else if use_default_if_uninit {
-        // >> use default config
-        let default_cfg = Config::default();
-        match default_cfg.save(repo_path) {
-            Ok(_) => {
-                term.write_line(
-                    format!(
-                        "{} {}",
-                        style("✔").green(),
-                        style("Generated config file").bold()
-                    )
-                    .as_str(),
-                )
-                .unwrap();
-                default_cfg
-            }
-            Err(err) => {
-                term.write_line(
-                    style(format!("✗ Failed to create config file: {}", err))
-                        .red()
-                        .bold()
-                        .to_string()
-                        .as_str(),
-                )
-                .unwrap();
-                exit(1);
-            }
-        }
-    } else {
+    }
+
+    if let Some(c) = cfg {
+        return c;
+    }
+
+    if !ask_for_creation {
         term.write_line(
-            style("✗ Missing repo config".to_string())
+            style("✗ Config not found".to_string())
                 .red()
                 .to_string()
                 .as_str(),
         )
         .unwrap();
         exit(1);
+    }
+
+    let cfg = match Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Create default config ?")
+        .report(true)
+        .default(true)
+        .interact()
+        .unwrap()
+    {
+        false => {
+            term.write_line(
+                style("✗ Config not found".to_string())
+                    .red()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            exit(1);
+        }
+        true => Config::default(),
     };
 
-    config
+    match cfg.save(cwd) {
+        Ok(_) => {
+            term.write_line(
+                format!(
+                    "{} {}",
+                    style("✔").green(),
+                    style("Generated config file").bold()
+                )
+                .as_str(),
+            )
+            .unwrap();
+        }
+        Err(err) => {
+            term.write_line(
+                style(format!("✗ Failed to create config file: {}", err))
+                    .red()
+                    .bold()
+                    .to_string()
+                    .as_str(),
+            )
+            .unwrap();
+            exit(1);
+        }
+    }
+
+    cfg
 }
