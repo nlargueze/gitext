@@ -105,20 +105,6 @@ impl ChangeLog {
         for c in commits {
             // eprintln!("{:#?}", c);
 
-            let commit_tag = tags.iter().find(|t| t.tag.commit_hash == c.id);
-            match commit_tag {
-                Some(t) => {
-                    // commit has a tag which means that it is another version
-                    data.releases.push(ChangeLogRelease {
-                        version: t.version.to_string(),
-                        date: t.tag.date.format("%Y-%m-%d").to_string(),
-                        history_url: "".to_string(),
-                        groups: BTreeMap::new(),
-                    });
-                }
-                None => {}
-            }
-
             // > get type and subject from the message
             let (r#type, subject) =
                 match ConventionalCommitMessage::parse(&c.message, &config.valid_commit_types()) {
@@ -136,6 +122,24 @@ impl ChangeLog {
                     }
                 };
 
+            if !config.changelog.included_types.contains(&r#type) {
+                continue;
+            }
+
+            let commit_tag = tags.iter().find(|t| t.tag.commit_hash == c.id);
+            match commit_tag {
+                Some(t) => {
+                    // commit has a tag which means that it is another version
+                    data.releases.push(ChangeLogRelease {
+                        version: t.version.to_string(),
+                        date: t.tag.date.format("%Y-%m-%d").to_string(),
+                        history_url: "".to_string(),
+                        groups: BTreeMap::new(),
+                    });
+                }
+                None => {}
+            }
+
             // add release commit group if unexisting
             let group = data
                 .releases
@@ -146,7 +150,7 @@ impl ChangeLog {
                 .or_insert_with(|| {
                     let title = if r#type == "uncategorized" {
                         "Uncategorized".to_string()
-                    } else if let Some(t) = config.changelog.types.get(r#type.as_str()) {
+                    } else if let Some(t) = config.changelog.titles.get(r#type.as_str()) {
                         t.clone()
                     } else {
                         r#type.clone()

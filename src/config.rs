@@ -52,26 +52,45 @@ impl Default for CommitsConfig {
 /// Changelog configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChangeLogConfig {
-    /// Commit types (key + title)
-    pub types: BTreeMap<String, String>,
+    /// Commit types included in the changelog
+    pub included_types: Vec<String>,
+    /// Sections titles for each type
+    pub titles: BTreeMap<String, String>,
 }
 
 impl Default for ChangeLogConfig {
     fn default() -> Self {
-        let mut types = BTreeMap::new();
-        types.insert("feat".to_string(), "New features".to_string());
-        types.insert("fix".to_string(), "Bug fixes".to_string());
-        types.insert("docs".to_string(), "Documentation changes".to_string());
-        types.insert("style".to_string(), "Code styling changes".to_string());
-        types.insert("refactor".to_string(), "Code refactoring".to_string());
-        types.insert("perf".to_string(), "Performance Improvements".to_string());
-        types.insert("test".to_string(), "Tests".to_string());
-        types.insert("build".to_string(), "Build system".to_string());
-        types.insert("ci".to_string(), "Continuous Integration".to_string());
-        types.insert("cd".to_string(), "Continuous Delivery".to_string());
-        types.insert("chore".to_string(), "Other changes".to_string());
+        let included_types = vec![
+            "feat".to_string(),
+            "fix".to_string(),
+            "docs".to_string(),
+            "style".to_string(),
+            "refactor".to_string(),
+            "perf".to_string(),
+            "test".to_string(),
+            "build".to_string(),
+            "ci".to_string(),
+            "cd".to_string(),
+            "chore".to_string(),
+        ];
 
-        Self { types }
+        let mut titles = BTreeMap::new();
+        titles.insert("feat".to_string(), "New features".to_string());
+        titles.insert("fix".to_string(), "Bug fixes".to_string());
+        titles.insert("docs".to_string(), "Documentation changes".to_string());
+        titles.insert("style".to_string(), "Code styling changes".to_string());
+        titles.insert("refactor".to_string(), "Code refactoring".to_string());
+        titles.insert("perf".to_string(), "Performance Improvements".to_string());
+        titles.insert("test".to_string(), "Tests".to_string());
+        titles.insert("build".to_string(), "Build system".to_string());
+        titles.insert("ci".to_string(), "Continuous Integration".to_string());
+        titles.insert("cd".to_string(), "Continuous Delivery".to_string());
+        titles.insert("chore".to_string(), "Other changes".to_string());
+
+        Self {
+            titles,
+            included_types,
+        }
     }
 }
 

@@ -17,7 +17,10 @@ test = "Tests"
 [hooks]
 pre-commit = ["cargo clippy"]
 
-[changelog.types]
+[changelog]
+included_types = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "cd", "chore"]
+
+[changelog.titles]
 build = "Build system"
 cd = "Continuous Delivery"
 chore = "Other changes"
