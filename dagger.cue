@@ -120,6 +120,7 @@ dagger.#Plan & {
 				gh release create $VERSION --title "Release $VERSION" --generate-notes
 				"""#
 		}
+		
 		// Publishes the crate
 		publish: bash.#Run & {
 			input: _baseImage.output
