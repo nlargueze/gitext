@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.12] - 2022-04-25
+
+https://github.com/nlargueze/gitext/compare/0.0.11...0.0.12
+
+### Continuous Delivery
+
+- Fixed release version not being picked up [#19b61](https://github.com/nlargueze/gitext/commit/19b618a9a23b4c41c2f5a2899f24e688eee0dbec)
+
 ## [0.0.11] - 2022-04-25
 
 https://github.com/nlargueze/gitext/compare/0.0.10...0.0.11
@@ -12,6 +20,7 @@ https://github.com/nlargueze/gitext/compare/0.0.10...0.0.11
 
 ### Other changes
 
+- Created release 0.0.11 [#ae7f8](https://github.com/nlargueze/gitext/commit/ae7f81f7677f2f7d9340abdea72d8212fe8bb00e)
 - Small style fix [#7f154](https://github.com/nlargueze/gitext/commit/7f1542bfb57e813fb408a8d263deac2679c0e0e1)
 
 ## [0.0.10] - 2022-04-25
