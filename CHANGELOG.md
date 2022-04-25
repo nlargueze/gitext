@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.11] - 2022-04-25
+
+https://github.com/nlargueze/gitext/compare/0.0.10...0.0.11
+
+### Continuous Delivery
+
+- Ignored .DS_Store file [#1d427](https://github.com/nlargueze/gitext/commit/1d42794ce7b9ba6ea28189750c2e72c5bce704f4)
+
+### Other changes
+
+- Small style fix [#7f154](https://github.com/nlargueze/gitext/commit/7f1542bfb57e813fb408a8d263deac2679c0e0e1)
+
 ## [0.0.10] - 2022-04-25
 
 https://github.com/nlargueze/gitext/compare/0.0.9...0.0.10
@@ -13,6 +25,10 @@ https://github.com/nlargueze/gitext/compare/0.0.9...0.0.10
 ### Continuous Delivery
 
 - Fixed CD deployment [#f9955](https://github.com/nlargueze/gitext/commit/f9955cf5dd0d7c632fb52e9120e403d2d4336324)
+
+### Other changes
+
+- Created release 0.0.10 [#9eb72](https://github.com/nlargueze/gitext/commit/9eb7210c0365a955c298cf980cb67e2efa1acff7)
 
 ## [0.0.9] - 2022-04-25
 
