@@ -20,8 +20,9 @@ dagger.#Plan & {
 			}
 		}
 		env: {
-			GITHUB_TOKEN: dagger.#Secret // use 'string' to show
-			CRATESIO_TOKEN: dagger.#Secret
+			GITHUB_TOKEN: dagger.#Secret | *"" // use 'string' to show
+			CRATESIO_TOKEN: dagger.#Secret | *""
+			RELEASE_VERSION: string | *""
 		}
 	}
 
@@ -114,10 +115,10 @@ dagger.#Plan & {
 			workdir: "/app"
 			env: {
 				GITHUB_TOKEN: client.env.GITHUB_TOKEN
+				RELEASE_VERSION: client.env.RELEASE_VERSION
 			}
 			script: contents: #"""
-				VERSION=$(git describe --exact-match --abbrev=0)
-				gh release create $VERSION --title "Release $VERSION" --generate-notes
+				gh release create $RELEASE_VERSION --title "Release $RELEASE_VERSION" --generate-notes
 				"""#
 		}
 		

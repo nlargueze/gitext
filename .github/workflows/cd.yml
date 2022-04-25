@@ -19,6 +19,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CRATESIO_TOKEN: ${{ secrets.CRATESIO_TOKEN }}
+          RELEASE_VERSION: ${{ github.ref_name }}
         # See all options at https://github.com/dagger/dagger-for-github
         with:
           # To pin external dependencies, you can use `project update github.com/[package-source]@v[n]`
