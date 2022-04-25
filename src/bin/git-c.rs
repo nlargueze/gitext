@@ -81,6 +81,15 @@ fn main() {
         r#type
     };
 
+    // > subject
+    let subject = Input::<String>::with_theme(&ColorfulTheme::default())
+        .with_prompt("Commit subject")
+        .report(true)
+        .interact_text()
+        .unwrap()
+        .trim()
+        .to_lowercase_first();
+
     // > scope
     let scope = {
         let scope: String = Input::with_theme(&ColorfulTheme::default())
@@ -95,15 +104,6 @@ fn main() {
             Some(scope.to_lowercase())
         }
     };
-
-    // > subject
-    let subject = Input::<String>::with_theme(&ColorfulTheme::default())
-        .with_prompt("Commit subject")
-        .report(true)
-        .interact_text()
-        .unwrap()
-        .trim()
-        .to_lowercase_first();
 
     // > body
     let body = {
