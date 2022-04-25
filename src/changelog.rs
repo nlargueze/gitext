@@ -2,8 +2,6 @@
 //!
 //! cf. https://keepachangelog.com/en/1.0.0/
 
-use std::collections::BTreeMap;
-
 use chrono::Utc;
 use handlebars::Handlebars;
 use indoc::indoc;
@@ -21,7 +19,9 @@ use crate::{
 
 /// Changelog template
 const CHANGELOG_TEMPLATE: &str = indoc!(
-    "# Changelog All notable changes to this project will be documented in this file.
+    "# Changelog 
+    
+    All notable changes to this project will be documented in this file.
 
     {{#each releases}}
     ## [{{this.version}}] - {{this.date}}
@@ -34,18 +34,28 @@ const CHANGELOG_TEMPLATE: &str = indoc!(
     ### {{this.title}}
 
     {{#each this.commits}}
-    - {{this}}
+    - {{this.prefix}}{{this.subject}} {{this.commit_link}}
     {{/each}}
 
     {{/each}}
     {{/each}}"
 );
 
+/// Changelog commit
+#[derive(Debug, Serialize)]
+struct ChangeLogCommit {
+    r#type: String,
+    prefix: String,
+    subject: String,
+    commit_link: String,
+}
+
 /// Changelog release group
 #[derive(Debug, Serialize)]
 struct ChangeLogReleaseGroup {
+    key: String,
     title: String,
-    commits: Vec<String>,
+    commits: Vec<ChangeLogCommit>,
 }
 
 /// Changelog release
@@ -57,8 +67,8 @@ struct ChangeLogRelease {
     date: String,
     /// Release commit history link
     history_url: String,
-    /// Commit group
-    groups: BTreeMap<String, ChangeLogReleaseGroup>,
+    /// Commits group
+    groups: Vec<ChangeLogReleaseGroup>,
 }
 
 /// ChangeLog data
@@ -91,88 +101,119 @@ impl ChangeLog {
         // parse commits
         let mut data = ChangeLogData { releases: vec![] };
         data.releases.push(ChangeLogRelease {
+            // NB: Could use "Unreleased" instead of the next version
             version: next_version.to_string(),
             date: Utc::now().format("%Y-%m-%d").to_string(),
             history_url: "".to_string(),
-            groups: BTreeMap::new(),
+            groups: vec![],
         });
 
         // read all logs from the start of the repository (latest to earliest)
         let commits = git_log("")?;
+
         // read all tags from the repository
         let tags = git_get_tags()?.into_semver()?;
+
+        // Origin URL
+        let origin_url = get_config_origin_url()?;
 
         for c in commits {
             // eprintln!("{:#?}", c);
 
             // > get type and subject from the message
-            let (r#type, subject) =
+            let changelog_commit =
                 match ConventionalCommitMessage::parse(&c.message, &config.valid_commit_types()) {
-                    Ok(c) => (c.r#type.clone(), c.subject.clone()),
+                    Ok(conv_msg) => {
+                        let mut short_hash = c.id.clone();
+                        short_hash.truncate(5);
+                        let commit_url = format!("{}/commit/{}", origin_url, c.id);
+                        let commit_link = format!("[#{}]({})", short_hash, commit_url);
+
+                        ChangeLogCommit {
+                            r#type: conv_msg.r#type.clone(),
+                            prefix: "".to_string(),
+                            // prefix: conv_msg
+                            //     .scope
+                            //     .map(|s| format!("{}: ", s))
+                            //     .unwrap_or_default(),
+                            subject: conv_msg.subject.clone().to_uppercase_first(),
+                            commit_link,
+                        }
+                    }
                     Err(err) => {
                         // NB: add as a specific group
                         let mut short_id = c.id.clone();
                         short_id.truncate(7);
                         warn!("Commit ({}) is unconventional ({})", short_id, err);
                         let commit_msg_first_line = c.message.lines().next().unwrap();
-                        (
-                            "uncategorized".to_string(),
-                            commit_msg_first_line.to_string(),
-                        )
+                        ChangeLogCommit {
+                            r#type: "uncategorized".to_string(),
+                            prefix: "".to_string(),
+                            subject: commit_msg_first_line.to_string(),
+                            commit_link: "".to_string(),
+                        }
                     }
                 };
 
-            if !config.changelog.included_types.contains(&r#type) {
+            let type_title = if let Some(type_cfg) = config
+                .changelog
+                .types
+                .iter()
+                .find(|t| t.key == changelog_commit.r#type && t.included.unwrap_or(true))
+            {
+                type_cfg.title.clone()
+            } else {
+                // NB: type is excluded from the changelog
                 continue;
-            }
+            };
 
             let commit_tag = tags.iter().find(|t| t.tag.commit_hash == c.id);
             match commit_tag {
                 Some(t) => {
-                    // commit has a tag which means that it is another version
+                    // commit has a tag which means that it belongs to another version
                     data.releases.push(ChangeLogRelease {
                         version: t.version.to_string(),
                         date: t.tag.date.format("%Y-%m-%d").to_string(),
                         history_url: "".to_string(),
-                        groups: BTreeMap::new(),
+                        groups: vec![],
                     });
                 }
                 None => {}
             }
 
-            // add release commit group if unexisting
-            let group = data
-                .releases
-                .last_mut()
-                .unwrap()
+            // add release for that commit
+            let release = data.releases.last_mut().unwrap();
+
+            if let Some(group) = release
                 .groups
-                .entry(r#type.clone())
-                .or_insert_with(|| {
-                    let title = if r#type == "uncategorized" {
-                        "Uncategorized".to_string()
-                    } else if let Some(t) = config.changelog.titles.get(r#type.as_str()) {
-                        t.clone()
-                    } else {
-                        r#type.clone()
-                    };
+                .iter_mut()
+                .find(|g| g.key == changelog_commit.r#type)
+            {
+                group.commits.push(changelog_commit);
+            } else {
+                // New group
+                let group_title = if changelog_commit.r#type == "uncategorized" {
+                    "Uncategorized".to_string()
+                } else {
+                    type_title
+                };
 
-                    ChangeLogReleaseGroup {
-                        title,
-                        commits: vec![],
-                    }
-                });
+                let group = ChangeLogReleaseGroup {
+                    key: changelog_commit.r#type.clone(),
+                    title: group_title,
+                    commits: vec![changelog_commit],
+                };
 
-            // add commit to group
-            group.commits.push(subject.to_uppercase_first());
+                release.groups.push(group);
+            };
         }
 
         // debug
         // eprintln!("{:#?}", data);
 
-        // add history link
+        // for each release, add history link & sort groups
         // [Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.0.0...HEAD
         // [1.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.2...v0.0.1
-        let origin_url = get_config_origin_url()?;
         let mut from_ref: Option<String> = None;
         for release in data.releases.iter_mut().rev() {
             if let Some(ref_start) = from_ref {
@@ -184,10 +225,26 @@ impl ChangeLog {
                 release.history_url = format!("{}/compare/{}...{}", origin_url, ref_start, ref_end);
             }
             from_ref = Some(release.version.clone());
+
+            // sort
+            release.groups.sort_by(|g1, g2| {
+                let i1 = config
+                    .changelog
+                    .types
+                    .iter()
+                    .position(|cfg_type| cfg_type.key == g1.key)
+                    .expect("Invalid type");
+                let i2 = config
+                    .changelog
+                    .types
+                    .iter()
+                    .position(|cfg_type| cfg_type.key == g2.key)
+                    .expect("Invalid type");
+                i1.cmp(&i2)
+            });
         }
 
         // render template
-        let txt = self.registry.render("changelog", &data)?;
-        Ok(txt)
+        Ok(self.registry.render("changelog", &data)?)
     }
 }

@@ -49,48 +49,85 @@ impl Default for CommitsConfig {
     }
 }
 
+/// Changelog type configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChangeLogTypeConfig {
+    /// Type key
+    pub key: String,
+    /// Type title
+    pub title: String,
+    /// Type is included
+    pub included: Option<bool>,
+}
+
 /// Changelog configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChangeLogConfig {
     /// Commit types included in the changelog
-    pub included_types: Vec<String>,
-    /// Sections titles for each type
-    pub titles: BTreeMap<String, String>,
+    pub types: Vec<ChangeLogTypeConfig>,
 }
 
 impl Default for ChangeLogConfig {
     fn default() -> Self {
-        let included_types = vec![
-            "feat".to_string(),
-            "fix".to_string(),
-            "docs".to_string(),
-            "style".to_string(),
-            "refactor".to_string(),
-            "perf".to_string(),
-            "test".to_string(),
-            "build".to_string(),
-            "ci".to_string(),
-            "cd".to_string(),
-            "chore".to_string(),
+        let types: Vec<ChangeLogTypeConfig> = vec![
+            ChangeLogTypeConfig {
+                key: "feat".to_string(),
+                title: "New features".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "fix".to_string(),
+                title: "Bug fixes".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "style".to_string(),
+                title: "Code styling changes".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "refactor".to_string(),
+                title: "Code refactoring".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "perf".to_string(),
+                title: "Performance Improvements".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "test".to_string(),
+                title: "Tests".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "build".to_string(),
+                title: "Build system".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "ci".to_string(),
+                title: "Continuous Integration".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "cd".to_string(),
+                title: "Continuous Delivery".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "docs".to_string(),
+                title: "Documentation changes".to_string(),
+                included: None,
+            },
+            ChangeLogTypeConfig {
+                key: "chore".to_string(),
+                title: "Other changes".to_string(),
+                included: None,
+            },
         ];
 
-        let mut titles = BTreeMap::new();
-        titles.insert("feat".to_string(), "New features".to_string());
-        titles.insert("fix".to_string(), "Bug fixes".to_string());
-        titles.insert("docs".to_string(), "Documentation changes".to_string());
-        titles.insert("style".to_string(), "Code styling changes".to_string());
-        titles.insert("refactor".to_string(), "Code refactoring".to_string());
-        titles.insert("perf".to_string(), "Performance Improvements".to_string());
-        titles.insert("test".to_string(), "Tests".to_string());
-        titles.insert("build".to_string(), "Build system".to_string());
-        titles.insert("ci".to_string(), "Continuous Integration".to_string());
-        titles.insert("cd".to_string(), "Continuous Delivery".to_string());
-        titles.insert("chore".to_string(), "Other changes".to_string());
-
-        Self {
-            titles,
-            included_types,
-        }
+        Self { types }
     }
 }
 
