@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.10] - 2022-04-25
+
+https://github.com/nlargueze/gitext/compare/0.0.9...0.0.10
+
+### Bug fixes
+
+- Moved commit scope prompt [#24b79](https://github.com/nlargueze/gitext/commit/24b79cd1595aef5c74860a3c6cf854e65cb8ad1c)
+
+### Continuous Delivery
+
+- Fixed CD deployment [#f9955](https://github.com/nlargueze/gitext/commit/f9955cf5dd0d7c632fb52e9120e403d2d4336324)
+
 ## [0.0.9] - 2022-04-25
 
 https://github.com/nlargueze/gitext/compare/0.0.8...0.0.9
@@ -9,6 +21,10 @@ https://github.com/nlargueze/gitext/compare/0.0.8...0.0.9
 ### Continuous Integration
 
 - Added CI dagger jobs and Github Actions [#dad72](https://github.com/nlargueze/gitext/commit/dad72c91752280a87a2aa6b746fe2753c0384a5d)
+
+### Other changes
+
+- Created release 0.0.9 [#6b4ed](https://github.com/nlargueze/gitext/commit/6b4edd5ba4093b5b44ffcb0b4d905e3745148912)
 
 ## [0.0.8] - 2022-04-25
 
