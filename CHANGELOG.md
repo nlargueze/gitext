@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.9] - 2022-04-25
+
+https://github.com/nlargueze/gitext/compare/0.0.8...0.0.9
+
+### Continuous Integration
+
+- Added CI dagger jobs and Github Actions [#dad72](https://github.com/nlargueze/gitext/commit/dad72c91752280a87a2aa6b746fe2753c0384a5d)
+
 ## [0.0.8] - 2022-04-25
 
 https://github.com/nlargueze/gitext/compare/0.0.7...0.0.8
@@ -16,6 +24,10 @@ https://github.com/nlargueze/gitext/compare/0.0.7...0.0.8
 - Fixed get_tags when there is no tag in the repo [#4b327](https://github.com/nlargueze/gitext/commit/4b3273eb197499a69c91895f0a686cb1e01b0320)
 - Fixed install-hooks script [#3480d](https://github.com/nlargueze/gitext/commit/3480daa99da8839374a568aa34abf2d1c295485b)
 - Set current directory of custom bump commands [#4a9d5](https://github.com/nlargueze/gitext/commit/4a9d5bf871448061f21549381e7fdb078f342853)
+
+### Other changes
+
+- Created release 0.0.8 [#b41d9](https://github.com/nlargueze/gitext/commit/b41d97868c8efd227a8351664cd94bb72116a319)
 
 ## [0.0.7] - 2022-04-23
 
