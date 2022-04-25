@@ -49,82 +49,27 @@ impl Default for CommitsConfig {
     }
 }
 
-/// Changelog type configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ChangeLogTypeConfig {
-    /// Type key
-    pub key: String,
-    /// Type title
-    pub title: String,
-    /// Type is included
-    pub included: Option<bool>,
-}
-
 /// Changelog configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChangeLogConfig {
-    /// Commit types included in the changelog
-    pub types: Vec<ChangeLogTypeConfig>,
+    /// Types to include in the changelog
+    pub types: Vec<String>,
 }
 
 impl Default for ChangeLogConfig {
     fn default() -> Self {
-        let types: Vec<ChangeLogTypeConfig> = vec![
-            ChangeLogTypeConfig {
-                key: "feat".to_string(),
-                title: "New features".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "fix".to_string(),
-                title: "Bug fixes".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "style".to_string(),
-                title: "Code styling changes".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "refactor".to_string(),
-                title: "Code refactoring".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "perf".to_string(),
-                title: "Performance Improvements".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "test".to_string(),
-                title: "Tests".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "build".to_string(),
-                title: "Build system".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "ci".to_string(),
-                title: "Continuous Integration".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "cd".to_string(),
-                title: "Continuous Delivery".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "docs".to_string(),
-                title: "Documentation changes".to_string(),
-                included: None,
-            },
-            ChangeLogTypeConfig {
-                key: "chore".to_string(),
-                title: "Other changes".to_string(),
-                included: None,
-            },
+        let types = vec![
+            "feat".to_string(),
+            "fix".to_string(),
+            "docs".to_string(),
+            "style".to_string(),
+            "refactor".to_string(),
+            "perf".to_string(),
+            "test".to_string(),
+            "build".to_string(),
+            "ci".to_string(),
+            "cd".to_string(),
+            "chore".to_string(),
         ];
 
         Self { types }

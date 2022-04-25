@@ -7,7 +7,7 @@ cd = "Continuous Delivery"
 chore = "Other changes"
 ci = "Continuous Integration"
 docs = "Documentation"
-feat = "A new feature"
+feat = "New features"
 fix = "Bug fixes"
 perf = "Performance Improvements"
 refactor = "Code refactoring"
@@ -17,49 +17,8 @@ test = "Tests"
 [hooks]
 pre-commit = ["cargo clippy"]
 
-[[changelog.types]]
-key = "feat"
-title = "New features"
-
-[[changelog.types]]
-key = "fix"
-title = "Bug fixes"
-
-[[changelog.types]]
-key = "style"
-title = "Code styling changes"
-
-[[changelog.types]]
-key = "refactor"
-title = "Code refactoring"
-
-[[changelog.types]]
-key = "perf"
-title = "Performance Improvements"
-
-[[changelog.types]]
-key = "test"
-title = "Tests"
-
-[[changelog.types]]
-key = "build"
-title = "Build system"
-
-[[changelog.types]]
-key = "ci"
-title = "Continuous Integration"
-
-[[changelog.types]]
-key = "cd"
-title = "Continuous Delivery"
-
-[[changelog.types]]
-key = "docs"
-title = "Documentation changes"
-
-[[changelog.types]]
-key = "chore"
-title = "Other changes"
+[changelog]
+types = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "cd", "chore"]
 
 [release]
 bump_commands = [

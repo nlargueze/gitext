@@ -155,13 +155,11 @@ impl ChangeLog {
                     }
                 };
 
-            let type_title = if let Some(type_cfg) = config
-                .changelog
-                .types
-                .iter()
-                .find(|t| t.key == changelog_commit.r#type && t.included.unwrap_or(true))
-            {
-                type_cfg.title.clone()
+            let type_title = if config.changelog.types.contains(&changelog_commit.r#type) {
+                match config.commit.types.get(&changelog_commit.r#type) {
+                    Some(x) => x.clone(),
+                    None => changelog_commit.r#type.clone(),
+                }
             } else {
                 // NB: type is excluded from the changelog
                 continue;
@@ -232,13 +230,13 @@ impl ChangeLog {
                     .changelog
                     .types
                     .iter()
-                    .position(|cfg_type| cfg_type.key == g1.key)
+                    .position(|cfg_type| cfg_type == &g1.key)
                     .expect("Invalid type");
                 let i2 = config
                     .changelog
                     .types
                     .iter()
-                    .position(|cfg_type| cfg_type.key == g2.key)
+                    .position(|cfg_type| cfg_type == &g2.key)
                     .expect("Invalid type");
                 i1.cmp(&i2)
             });
