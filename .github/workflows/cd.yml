@@ -16,6 +16,9 @@ jobs:
 
       - name: Dagger jobs
         uses: dagger/dagger-for-github@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CRATESIO_TOKEN: ${{ secrets.CRATESIO_TOKEN }}
         # See all options at https://github.com/dagger/dagger-for-github
         with:
           # To pin external dependencies, you can use `project update github.com/[package-source]@v[n]`

@@ -115,7 +115,6 @@ dagger.#Plan & {
 			env: {
 				GITHUB_TOKEN: client.env.GITHUB_TOKEN
 			}
-			
 			script: contents: #"""
 				VERSION=$(git describe --exact-match --abbrev=0)
 				gh release create $VERSION --title "Release $VERSION" --generate-notes
