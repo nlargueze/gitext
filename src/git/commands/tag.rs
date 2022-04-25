@@ -11,16 +11,33 @@ use crate::{
 
 /// Wrapper for `git tag --list`
 pub fn git_get_tags() -> Result<Vec<GitTag>> {
-    let output = Command::new("git")
+    // get all tags
+    let output_git_tag = Command::new("git")
+        .args([
+            "tag",
+            "--list",
+            "--format=%(refname:short)|%(creatordate:iso-strict)|%(objectname)",
+        ])
+        .output()?;
+    if !output_git_tag.status.success() {
+        return Err(Error::InternalError("Failed to get git tags".to_string()));
+    }
+
+    let output_git_tag_str = String::from_utf8_lossy(&output_git_tag.stdout);
+    if output_git_tag_str.lines().count() == 0 {
+        return Ok(vec![]);
+    }
+
+    // map tag hashes to cmmit hashes
+    let output_show_ref = Command::new("git")
         .args(["show-ref", "--tags", "--dereference"])
         .output()?;
-    if !output.status.success() {
+    if !output_show_ref.status.success() {
         return Err(Error::InternalError(
             "Failed to get git tag refs".to_string(),
         ));
     }
-    let hash_ref_map: HashMap<_, _> = String::from_utf8(output.stdout)
-        .unwrap()
+    let hash_ref_map: HashMap<_, _> = String::from_utf8_lossy(&output_show_ref.stdout)
         .lines()
         .map(|line| {
             let parts: Vec<_> = line.splitn(2, ' ').collect();
@@ -46,20 +63,7 @@ pub fn git_get_tags() -> Result<Vec<GitTag>> {
         }
     }
 
-    // get all tags
-    let output = Command::new("git")
-        .args([
-            "tag",
-            "--list",
-            "--format=%(refname:short)|%(creatordate:iso-strict)|%(objectname)",
-        ])
-        .output()?;
-    if !output.status.success() {
-        return Err(Error::InternalError("Failed to get git tags".to_string()));
-    }
-
-    let tags: Vec<_> = String::from_utf8(output.stdout)
-        .unwrap()
+    let tags: Vec<_> = output_git_tag_str
         .lines()
         .map(|line| {
             let parts: Vec<_> = line.splitn(3, '|').collect();
