@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.15] - 2022-04-26
+
+https://github.com/nlargueze/gitext/compare/0.0.14...0.0.15
+
+### Bug fixes
+
+- Fixed release notes format [#d6b40](https://github.com/nlargueze/gitext/commit/d6b40d8a356061c61dd80086fc7ed735f7e8d9b4)
+
 ## [0.0.14] - 2022-04-26
 
 https://github.com/nlargueze/gitext/compare/0.0.13...0.0.14
@@ -20,6 +28,7 @@ https://github.com/nlargueze/gitext/compare/0.0.13...0.0.14
 
 ### Other changes
 
+- Created release 0.0.14 [#672b3](https://github.com/nlargueze/gitext/commit/672b305097ca2423bf253626a2e97531118133ad)
 - Changed default config [#b8a15](https://github.com/nlargueze/gitext/commit/b8a15c88b083274dc92d5bc8a38ecdc1ffe5715d)
 - Fixed CHANGELOG template lint issue [#675f5](https://github.com/nlargueze/gitext/commit/675f5ddc7407d751914bf83d4b10d21036f17896)
 
