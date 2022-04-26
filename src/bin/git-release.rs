@@ -28,6 +28,9 @@ pub struct Cli {
     /// If set, commits and tags are pushed
     #[clap(long, short)]
     pub push: bool,
+    /// If set, the RELEASENOTES.md file is not generated
+    #[clap(long)]
+    pub no_release_notes: bool,
 }
 
 fn main() {
@@ -99,14 +102,15 @@ fn main() {
         }
     };
 
-    let changelog_str = match changelog.generate(&config, &next_version.to_string()) {
-        Ok(s) => s,
-        Err(err) => {
-            term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
-                .unwrap();
-            exit(1);
-        }
-    };
+    let (changelog_str, releasenotes_str) =
+        match changelog.generate(&config, &next_version.to_string()) {
+            Ok(s) => s,
+            Err(err) => {
+                term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                    .unwrap();
+                exit(1);
+            }
+        };
 
     if !args.commit {
         term.write_line(
@@ -154,6 +158,27 @@ fn main() {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
                 .unwrap();
             exit(1);
+        }
+    }
+
+    if !args.no_release_notes {
+        match fs::write(cwd.join("RELEASENOTES.md"), releasenotes_str) {
+            Ok(_) => {
+                term.write_line(
+                    format!(
+                        "{} {}",
+                        style("✔").green(),
+                        style("Generated release notes").bold()
+                    )
+                    .as_str(),
+                )
+                .unwrap();
+            }
+            Err(err) => {
+                term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
+                    .unwrap();
+                exit(1);
+            }
         }
     }
 

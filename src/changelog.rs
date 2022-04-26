@@ -45,8 +45,22 @@ const CHANGELOG_TEMPLATE: &str = indoc!(
     {{/each}}"
 );
 
+/// Release Notes template
+const RELEASENOTES_TEMPLATE: &str = indoc!(
+    "Release notes for {{this.version}}
+    
+    {{#each this.groups}}
+    ### {{this.title}}
+
+    {{#each this.commits}}
+    - {{this.prefix}}{{this.subject}} {{this.commit_link}}
+    {{/each}}
+    {{/each}}
+    "
+);
+
 /// Changelog commit
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 struct ChangeLogCommit {
     r#type: String,
     prefix: String,
@@ -55,7 +69,7 @@ struct ChangeLogCommit {
 }
 
 /// Changelog release group
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 struct ChangeLogReleaseGroup {
     key: String,
     title: String,
@@ -63,7 +77,7 @@ struct ChangeLogReleaseGroup {
 }
 
 /// Changelog release
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 struct ChangeLogRelease {
     /// Release version
     version: String,
@@ -82,6 +96,15 @@ struct ChangeLogData {
     releases: Vec<ChangeLogRelease>,
 }
 
+/// Release notes data
+#[derive(Debug, Serialize)]
+struct ReleaseNotesData {
+    /// Release version
+    version: String,
+    /// Commits groups
+    groups: Vec<ChangeLogReleaseGroup>,
+}
+
 /// A change log template.
 #[derive(Debug)]
 pub struct ChangeLog {
@@ -96,12 +119,13 @@ impl ChangeLog {
         let mut registry = Handlebars::new();
         // registry.set_strict_mode(true);
         registry.register_template_string("changelog", CHANGELOG_TEMPLATE)?;
+        registry.register_template_string("releasenotes", RELEASENOTES_TEMPLATE)?;
 
         Ok(Self { registry })
     }
 
     /// Generates the change log file.
-    pub fn generate(&self, config: &Config, next_version: &str) -> Result<String> {
+    pub fn generate(&self, config: &Config, next_version: &str) -> Result<(String, String)> {
         // parse commits
         let mut data = ChangeLogData { releases: vec![] };
         data.releases.push(ChangeLogRelease {
@@ -246,7 +270,17 @@ impl ChangeLog {
             });
         }
 
-        // render template
-        Ok(self.registry.render("changelog", &data)?)
+        // render changelog
+        let changelog = self.registry.render("changelog", &data)?;
+
+        // render release notes
+        let this_release = data.releases.first().unwrap();
+        let release_notes_date = ReleaseNotesData {
+            version: this_release.version.clone(),
+            groups: this_release.groups.to_vec(),
+        };
+        let releasenotes = self.registry.render("releasenotes", &release_notes_date)?;
+
+        Ok((changelog, releasenotes))
     }
 }

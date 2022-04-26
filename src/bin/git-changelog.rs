@@ -99,7 +99,7 @@ fn main() {
     };
 
     // generate the change log file
-    let changelog_str = match changelog.generate(&config, &next_version) {
+    let (changelog_str, _) = match changelog.generate(&config, &next_version) {
         Ok(s) => s,
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())
