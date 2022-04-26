@@ -1,4 +1,4 @@
-//! Git stage/add
+//! Wrappers for `git add` commands
 
 use std::process::Command;
 

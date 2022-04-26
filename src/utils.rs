@@ -1,6 +1,6 @@
-//! Misc. utilities.
+//! Misc. utilities
 
-/// String extension
+/// Additional methods for strings
 pub trait StringExt {
     /// Checks if the string is all lowercase
     fn is_lowercase(&self) -> bool;

@@ -9,7 +9,7 @@ use dialoguer::{theme::ColorfulTheme, Confirm};
 use gitext::{
     commands::shared::{load_config, set_current_dir_from_arg},
     git::{git_set_tag, git_status_porcelain},
-    version::bump_repo_version,
+    version::get_repo_next_version,
 };
 
 /// Bump command
@@ -80,7 +80,7 @@ fn main() {
     }
 
     // bump
-    let (next_version, curr_version) = match bump_repo_version(&config) {
+    let (next_version, curr_version) = match get_repo_next_version(&config) {
         Ok(commits) => commits,
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())

@@ -9,7 +9,7 @@ use gitext::{
     changelog::ChangeLog,
     commands::shared::{load_config, set_current_dir_from_arg},
     git::{git_add, git_commit, git_push_follow_tags, git_set_tag, git_status_porcelain},
-    version::{bump_repo_version, exec_bump_commands},
+    version::{exec_bump_commands, get_repo_next_version},
 };
 
 /// Release command
@@ -90,7 +90,7 @@ fn main() {
         }
     };
 
-    let (next_version, prev_version) = match bump_repo_version(&config) {
+    let (next_version, prev_version) = match get_repo_next_version(&config) {
         Ok((next_version, prev_version)) => (next_version, prev_version),
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())

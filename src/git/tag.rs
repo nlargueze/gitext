@@ -1,4 +1,4 @@
-//! Wrappers for `git tag`
+//! Wrappers for git tags
 
 use std::fmt::Display;
 

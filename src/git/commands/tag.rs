@@ -1,4 +1,4 @@
-//! Get/Set tags
+//! Wrappers for `git tag` commands
 
 use std::{collections::HashMap, process::Command};
 

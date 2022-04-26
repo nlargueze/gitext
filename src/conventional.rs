@@ -1,4 +1,4 @@
-//! Conventional commit
+//! Conventional commit parsing and formatting
 
 use std::{io::BufRead, string::ToString};
 
@@ -9,7 +9,7 @@ use crate::{
     utils::StringExt,
 };
 
-/// Conventional commit message
+/// Conventional commit message.
 #[derive(Debug, PartialEq, Default)]
 pub struct ConventionalCommitMessage {
     /// Commit type

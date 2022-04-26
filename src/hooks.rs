@@ -1,4 +1,4 @@
-//! Git hooks
+//! Git hooks management
 
 use std::collections::HashMap;
 
@@ -7,7 +7,7 @@ use crate::{
     error::{Error, Result},
 };
 
-/// Creates git hook sscripts
+/// Creates the git hook shell scripts
 pub fn create_git_hooks_scripts(config: &Config) -> Result<HashMap<String, String>> {
     let mut scripts: HashMap<String, String> = HashMap::new();
 

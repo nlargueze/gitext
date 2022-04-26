@@ -1,6 +1,10 @@
-//! Changelog generator
+//! Changelog generation
 //!
-//! cf. https://keepachangelog.com/en/1.0.0/
+//! ## Format
+//!
+//! The format is inspired by:
+//!
+//! Refer to [https://keepachangelog.com/en/1.0.0/](https://keepachangelog.com/en/1.0.0/)
 
 use chrono::Utc;
 use handlebars::Handlebars;
@@ -78,15 +82,15 @@ struct ChangeLogData {
     releases: Vec<ChangeLogRelease>,
 }
 
-/// Changelog
+/// A change log template.
 #[derive(Debug)]
 pub struct ChangeLog {
-    /// Change log template engine
+    /// Change log template engine.
     registry: Handlebars<'static>,
 }
 
 impl ChangeLog {
-    /// Initializes the changelog
+    /// Initializes the changelog.
     pub fn init() -> Result<Self> {
         // init template registry
         let mut registry = Handlebars::new();
@@ -96,7 +100,7 @@ impl ChangeLog {
         Ok(Self { registry })
     }
 
-    /// Generates the change log file
+    /// Generates the change log file.
     pub fn generate(&self, config: &Config, next_version: &str) -> Result<String> {
         // parse commits
         let mut data = ChangeLogData { releases: vec![] };

@@ -1,4 +1,11 @@
-//! `gitext` CLI support library
+//! Extra git commands to manage repos commit and release process.
+//!
+//! The crate provides a number of executables to:
+//! - Commit using conventional commits.
+//! - Determine the next version following the conventional commit guidelines.
+//! - Bump the version in the code package manifest.
+//! - Create a CHANGELOG.
+//! - Perform the release process.
 
 #![deny(missing_docs)]
 

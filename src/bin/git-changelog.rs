@@ -10,7 +10,7 @@ use gitext::{
     changelog::ChangeLog,
     commands::shared::{load_config, set_current_dir_from_arg},
     git::git_status_porcelain,
-    version::bump_repo_version,
+    version::get_repo_next_version,
 };
 
 /// Lint command
@@ -89,7 +89,7 @@ fn main() {
 
     // get the latest version based on the commit history
     // NB: can be replaced by Unreleased tag
-    let next_version = match bump_repo_version(&config) {
+    let next_version = match get_repo_next_version(&config) {
         Ok((v, _)) => v.to_string(),
         Err(err) => {
             term.write_line(style(format!("✗ {err}")).red().to_string().as_str())

@@ -1,4 +1,4 @@
-//! Git push wrapper
+//! Wrappers for `git push` commands
 
 use std::process::Command;
 

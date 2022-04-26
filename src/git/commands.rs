@@ -1,4 +1,4 @@
-//! git commands
+//! Wrappers for git commands
 
 pub mod add;
 pub mod commit;

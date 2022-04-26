@@ -1,4 +1,4 @@
-//! Commit commands
+//! Wrappers for `git commit` and `git log` commands
 
 use std::process::Command;
 

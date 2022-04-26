@@ -1,4 +1,4 @@
-//! Git commits
+//! Wrappers for git commits
 
 use std::fmt::Display;
 
