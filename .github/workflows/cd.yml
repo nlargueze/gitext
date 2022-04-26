@@ -4,7 +4,7 @@ on:
   push:
     # Trigger this workflow only on commits pushed with a tag
     tags:
-      - "*"
+      - "v*"
 
 jobs:
   publish:

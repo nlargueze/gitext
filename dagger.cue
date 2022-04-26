@@ -20,9 +20,9 @@ dagger.#Plan & {
 			}
 		}
 		env: {
-			GITHUB_TOKEN: dagger.#Secret // use 'string' to show
+			GITHUB_TOKEN: dagger.#Secret
 			CRATESIO_TOKEN: dagger.#Secret
-			RELEASE_VERSION: string | *""
+			RELEASE_VERSION: string
 		}
 	}
 
