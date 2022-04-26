@@ -28,10 +28,10 @@ pub struct CommitsConfig {
 impl Default for CommitsConfig {
     fn default() -> Self {
         let mut types = BTreeMap::new();
-        types.insert("feat".to_string(), "A new feature".to_string());
+        types.insert("feat".to_string(), "New features".to_string());
         types.insert("fix".to_string(), "Bug fixes".to_string());
         types.insert("docs".to_string(), "Documentation".to_string());
-        types.insert("style".to_string(), "Code styling".to_string());
+        types.insert("style".to_string(), "Styling".to_string());
         types.insert("refactor".to_string(), "Code refactoring".to_string());
         types.insert("perf".to_string(), "Performance Improvements".to_string());
         types.insert("test".to_string(), "Tests".to_string());
