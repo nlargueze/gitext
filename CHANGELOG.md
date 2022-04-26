@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.13] - 2022-04-26
+
+https://github.com/nlargueze/gitext/compare/0.0.12...0.0.13
+
+### Bug fixes
+
+- Added &#x27;v&#x27; prefix to git tags [#5a4ed](https://github.com/nlargueze/gitext/commit/5a4edbd8c1bc303c0b322ae3949daf0b052455c5)
+
+### Continuous Delivery
+
+- Fixed CD workflow [#f39e6](https://github.com/nlargueze/gitext/commit/f39e6e7760107a9977f83fc94b5e466be2abf5fb)
+
+### Other changes
+
+- Simplified config [#d3918](https://github.com/nlargueze/gitext/commit/d3918b7bda90d0045ae458a53fcc3f784acc5fee)
+
 ## [0.0.12] - 2022-04-25
 
 https://github.com/nlargueze/gitext/compare/0.0.11...0.0.12
@@ -9,6 +25,10 @@ https://github.com/nlargueze/gitext/compare/0.0.11...0.0.12
 ### Continuous Delivery
 
 - Fixed release version not being picked up [#19b61](https://github.com/nlargueze/gitext/commit/19b618a9a23b4c41c2f5a2899f24e688eee0dbec)
+
+### Other changes
+
+- Created release 0.0.12 [#273bd](https://github.com/nlargueze/gitext/commit/273bd7413951a3bcd419456deb8046ca833d01a2)
 
 ## [0.0.11] - 2022-04-25
 
