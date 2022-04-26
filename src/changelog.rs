@@ -19,7 +19,7 @@ use crate::{
 
 /// Changelog template
 const CHANGELOG_TEMPLATE: &str = indoc!(
-    "# Changelog 
+    "# Changelog
     
     All notable changes to this project will be documented in this file.
 
