@@ -47,7 +47,8 @@ pub trait IntoSemverGitTag {
 
 impl IntoSemverGitTag for GitTag {
     fn into_semver(self) -> Result<SemverGitTag> {
-        let version = semver::Version::parse(&self.tag)?;
+        let clean_tag = self.tag.strip_prefix('v').unwrap_or(&self.tag);
+        let version = semver::Version::parse(clean_tag)?;
         Ok(SemverGitTag { version, tag: self })
     }
 }

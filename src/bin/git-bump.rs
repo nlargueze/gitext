@@ -104,7 +104,8 @@ fn main() {
         .as_str(),
     )
     .unwrap();
-    let next_version_str = next_version.to_string();
+
+    let next_git_version = format!("v{}", next_version);
 
     // dry run
     if !args.tag {
@@ -117,21 +118,21 @@ fn main() {
             .as_str(),
         )
         .unwrap();
-        print!("{}", next_version_str);
+        print!("{}", next_git_version);
         exit(0);
     }
 
     // Tag the repo with the new version
     match git_set_tag(
-        &next_version_str,
-        format!("Version v{next_version_str}").as_str(),
+        &next_git_version,
+        format!("Version {next_git_version}").as_str(),
     ) {
         Ok(_) => {
             term.write_line(
                 format!(
                     "{} {}",
                     style("✔").green(),
-                    style(format!("Repo tagged as {next_version_str}")).bold()
+                    style(format!("Repo tagged as {next_git_version}")).bold()
                 )
                 .as_str(),
             )
@@ -144,5 +145,5 @@ fn main() {
         }
     }
 
-    print!("{}", next_version_str);
+    print!("{}", next_git_version);
 }

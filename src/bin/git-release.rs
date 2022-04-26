@@ -215,14 +215,17 @@ fn main() {
     }
 
     // 5. Tag the commit
-    let tag_msg = format!("Release {next_version}");
-    match git_set_tag(&next_version.to_string(), &tag_msg) {
+    let new_git_tag = format!("v{}", next_version);
+    match git_set_tag(
+        new_git_tag.as_str(),
+        format!("Release {next_version}").as_str(),
+    ) {
         Ok(_) => {
             term.write_line(
                 format!(
                     "{} {}",
                     style("✔").green(),
-                    style(format!("Tagged commit as {next_version} ")).bold()
+                    style(format!("Tagged commit as {new_git_tag} ")).bold()
                 )
                 .as_str(),
             )
