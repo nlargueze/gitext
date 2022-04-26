@@ -162,7 +162,7 @@ fn main() {
     }
 
     if !args.no_release_notes {
-        match fs::write(cwd.join("RELEASENOTES.md"), releasenotes_str) {
+        match fs::write(cwd.join("CHANGELOG_RELEASE.md"), releasenotes_str) {
             Ok(_) => {
                 term.write_line(
                     format!(

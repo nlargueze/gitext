@@ -47,7 +47,7 @@ const CHANGELOG_TEMPLATE: &str = indoc!(
 
 /// Release Notes template
 const RELEASENOTES_TEMPLATE: &str = indoc!(
-    "Release notes for {{this.version}}
+    "Release notes for `v{{this.version}}`
     
     {{#each this.groups}}
     ### {{this.title}}
@@ -55,6 +55,7 @@ const RELEASENOTES_TEMPLATE: &str = indoc!(
     {{#each this.commits}}
     - {{this.prefix}}{{this.subject}} {{this.commit_link}}
     {{/each}}
+
     {{/each}}
     "
 );
