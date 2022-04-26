@@ -31,10 +31,10 @@ impl Default for CommitsConfig {
         types.insert("feat".to_string(), "New features".to_string());
         types.insert("fix".to_string(), "Bug fixes".to_string());
         types.insert("docs".to_string(), "Documentation".to_string());
-        types.insert("style".to_string(), "Styling".to_string());
+        types.insert("style".to_string(), "Code styling".to_string());
         types.insert("refactor".to_string(), "Code refactoring".to_string());
         types.insert("perf".to_string(), "Performance Improvements".to_string());
-        types.insert("test".to_string(), "Tests".to_string());
+        types.insert("test".to_string(), "Testing".to_string());
         types.insert("build".to_string(), "Build system".to_string());
         types.insert("ci".to_string(), "Continuous Integration".to_string());
         types.insert("cd".to_string(), "Continuous Delivery".to_string());
@@ -62,8 +62,6 @@ impl Default for ChangeLogConfig {
             "feat".to_string(),
             "fix".to_string(),
             "docs".to_string(),
-            "style".to_string(),
-            "refactor".to_string(),
             "perf".to_string(),
             "test".to_string(),
             "build".to_string(),

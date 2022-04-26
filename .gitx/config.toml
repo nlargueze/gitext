@@ -12,13 +12,13 @@ fix = "Bug fixes"
 perf = "Performance Improvements"
 refactor = "Code refactoring"
 style = "Code styling"
-test = "Tests"
+test = "Testing"
 
 [hooks]
 pre-commit = ["cargo clippy"]
 
 [changelog]
-types = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "cd", "chore"]
+types = ["feat", "fix", "docs", "perf", "test", "build", "ci", "cd", "chore"]
 
 [release]
 bump_commands = [
