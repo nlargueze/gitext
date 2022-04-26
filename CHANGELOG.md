@@ -1,6 +1,27 @@
-# Changelog 
+# Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [0.0.14] - 2022-04-26
+
+https://github.com/nlargueze/gitext/compare/0.0.13...0.0.14
+
+### New features
+
+- Added release notes generation [#e04c1](https://github.com/nlargueze/gitext/commit/e04c14cd1c28fc246e7eb140d2fce898dea168ee)
+
+### Bug fixes
+
+- Changed type descriptions [#386d6](https://github.com/nlargueze/gitext/commit/386d68676ecf40e3ee53dfe5b32094e3d5d1c040)
+
+### Documentation
+
+- Fixed documentation [#45734](https://github.com/nlargueze/gitext/commit/45734a2e382597ce5784c81a9ea1fac43f84c224)
+
+### Other changes
+
+- Changed default config [#b8a15](https://github.com/nlargueze/gitext/commit/b8a15c88b083274dc92d5bc8a38ecdc1ffe5715d)
+- Fixed CHANGELOG template lint issue [#675f5](https://github.com/nlargueze/gitext/commit/675f5ddc7407d751914bf83d4b10d21036f17896)
 
 ## [0.0.13] - 2022-04-26
 
@@ -16,6 +37,7 @@ https://github.com/nlargueze/gitext/compare/0.0.12...0.0.13
 
 ### Other changes
 
+- Created release 0.0.13 [#7cf3b](https://github.com/nlargueze/gitext/commit/7cf3bf41f6ef753f7c150ab1f86e3076c04b34a9)
 - Simplified config [#d3918](https://github.com/nlargueze/gitext/commit/d3918b7bda90d0045ae458a53fcc3f784acc5fee)
 
 ## [0.0.12] - 2022-04-25
@@ -156,10 +178,6 @@ https://github.com/nlargueze/gitext/compare/0.0.1...0.0.3
 - Fixed annotated tags not picking up the commit hashes [#814a1](https://github.com/nlargueze/gitext/commit/814a107c7a56985df823bf01a97a024adaf95b2a)
 - Config looked up recursively and not created automatically [#0640b](https://github.com/nlargueze/gitext/commit/0640b882c2cfff4d85268438b89ede8a05d0d8eb)
 
-### Code refactoring
-
-- Moved git_log() to another file [#d5d56](https://github.com/nlargueze/gitext/commit/d5d56c7b4d214741a421499a0e9ecae50a481c47)
-
 ### Other changes
 
 - Created release 0.0.3 [#c8bbd](https://github.com/nlargueze/gitext/commit/c8bbd30717ad5eb47d0673bfb70db7924b43b35d)
@@ -204,14 +222,6 @@ https://github.com/nlargueze/gitext/compare/0.0.1...0.0.3
 - Removed displayed commit message on push [#3dd75](https://github.com/nlargueze/gitext/commit/3dd7532b9225bc5bbc183904999589c15a7762d5)
 - Removed commit message on push [#b8ea7](https://github.com/nlargueze/gitext/commit/b8ea739cc4bdc1096f3f203d0a2c14d3bf7f776c)
 - Removed print message [#e8cc4](https://github.com/nlargueze/gitext/commit/e8cc423394d4e677c6ecb8e43c76819505db5082)
-
-### Code refactoring
-
-- Separated commands in separate binaries [#ceb39](https://github.com/nlargueze/gitext/commit/ceb390d8fc9f61fd5003f0b55b61cc297a7fc72c)
-- Changed repo/create name [#847ae](https://github.com/nlargueze/gitext/commit/847ae58b8086af81db3776e3d964978889f9f982)
-- Changed repo/create name [#c27bd](https://github.com/nlargueze/gitext/commit/c27bd2265433694924fb3aca226867e1425e5b2f)
-- Refactored all code [#04daa](https://github.com/nlargueze/gitext/commit/04daa20351fdec40264a8bb53531231f81167c88)
-- Refactored a bunch of stuff [#ae9db](https://github.com/nlargueze/gitext/commit/ae9dbd630c48b20e9ff0e6f0c2d24f4eda5e1c57)
 
 ### Other changes
 
