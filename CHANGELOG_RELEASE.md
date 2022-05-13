@@ -1,6 +1,10 @@
-Release notes for `v0.0.15`
+Release notes for `v0.0.16`
 
-### Bug fixes
+### Continuous Delivery
 
-- Fixed release notes format [#d6b40](https://github.com/nlargueze/gitext/commit/d6b40d8a356061c61dd80086fc7ed735f7e8d9b4)
+- Removed Dagger setup, moved back to Github Actions [#a7491](https://github.com/nlargueze/gitext/commit/a749198717ab740efc3760e77352cf1660d95bb3)
+
+### Other changes
+
+- Removed RELEASENOTES.md file [#1c130](https://github.com/nlargueze/gitext/commit/1c13096ad17d95be361e83198b17839c7c9744fb)
 

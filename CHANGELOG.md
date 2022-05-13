@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.16] - 2022-05-13
+
+https://github.com/nlargueze/gitext/compare/0.0.15...0.0.16
+
+### Continuous Delivery
+
+- Removed Dagger setup, moved back to Github Actions [#a7491](https://github.com/nlargueze/gitext/commit/a749198717ab740efc3760e77352cf1660d95bb3)
+
+### Other changes
+
+- Removed RELEASENOTES.md file [#1c130](https://github.com/nlargueze/gitext/commit/1c13096ad17d95be361e83198b17839c7c9744fb)
+
 ## [0.0.15] - 2022-04-26
 
 https://github.com/nlargueze/gitext/compare/0.0.14...0.0.15
@@ -9,6 +21,10 @@ https://github.com/nlargueze/gitext/compare/0.0.14...0.0.15
 ### Bug fixes
 
 - Fixed release notes format [#d6b40](https://github.com/nlargueze/gitext/commit/d6b40d8a356061c61dd80086fc7ed735f7e8d9b4)
+
+### Other changes
+
+- Created release 0.0.15 [#a7d98](https://github.com/nlargueze/gitext/commit/a7d98f931d5ec7e98fd6b1ccd5570ebbe72998f0)
 
 ## [0.0.14] - 2022-04-26
 
