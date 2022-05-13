@@ -31,6 +31,8 @@ jobs:
 
   cd-release:
     name: Release
+    needs:
+      - cd-lint-build
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -56,6 +58,8 @@ jobs:
 
   cd-publish:
     name: Publish
+    needs:
+      - cd-release
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
