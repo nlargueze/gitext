@@ -7,20 +7,36 @@ on:
       - main
 
 jobs:
-  ci:
-    name: CI tests
+  ci-lint:
+    name: CI Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Clone repository
+      - name: Clone repo
         uses: actions/checkout@v3
 
-      # You need to run `dagger project init` locally before and commit the cue.mod directory to the repository with its contents
-      - name: Dagger jobs
-        uses: dagger/dagger-for-github@v2
-        # See all options at https://github.com/dagger/dagger-for-github
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
         with:
-          # To pin external dependencies, you can use `project update github.com/[package-source]@v[n]`
-          cmds: |
-            project update
-            do lint
-            do build
+          toolchain: 1.60.0
+          profile: default
+
+      - name: Clippy
+        run: |
+          cargo --version
+          cargo clippy
+
+  ci-build:
+    name: CI Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.60.0
+          profile: default
+
+      - name: Build
+        run: cargo build
