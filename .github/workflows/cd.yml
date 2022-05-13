@@ -52,9 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ github.ref_name }}
         run: |
-          echo $RELEASE_VERSION
-
-        # gh release create $RELEASE_VERSION --title "Release $RELEASE_VERSION" --generate-notes --notes-file CHANGELOG_RELEASE.md
+          gh release create $RELEASE_VERSION --title "Release $RELEASE_VERSION" --generate-notes --notes-file CHANGELOG_RELEASE.md
 
   cd-publish:
     name: Publish
